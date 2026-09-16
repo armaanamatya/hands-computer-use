@@ -30,6 +30,7 @@ from hands.evidence.run_log import RunLog, new_run_id
 from hands.safety.policy import Policy
 from hands.safety.redact import Redactor
 from hands.schema.capability import AppInfo, Capability, InputSpec, OutputSpec
+from hands.schema.control import ControlStateRecord, InterventionRequest
 from hands.surface.web import WebSurface
 
 # An input literally named "password" is always treated as sensitive, even
@@ -38,6 +39,12 @@ _ALWAYS_SENSITIVE = {"password"}
 
 _MONEY_RE = re.compile(r"-?\$?[\d,]+\.\d{2}")
 _INT_RE = re.compile(r"-?\d+")
+
+# `hands operator serve`'s default HTTP port. `claim`/`resume` default to the
+# SAME port, so the common case -- one terminal running `hands operator
+# serve`, another running `hands operator claim <id>` -- works with no
+# --port flag on either side.
+_DEFAULT_OPERATOR_PORT = 8765
 
 
 # ==========================================================================
@@ -608,6 +615,207 @@ def _cmd_inspect(args: argparse.Namespace) -> int:
 
 
 # ==========================================================================
+# operator
+# ==========================================================================
+#
+# The handoff layer (hands/handoff/) ships a state-machine controller and an
+# HTTP console for it, but had no CLI path onto either -- this subcommand
+# group is that path. `status`/`list` read evidence off disk (never from a
+# live process): "who is in control?" must be answerable from a crashed run
+# just as well as a live one, which is the whole point of
+# `SessionController` persisting `control_state.json` on every transition
+# (see hands/handoff/controller.py's module docstring). `claim`/`resume`
+# instead talk to an ALREADY-RUNNING `OperatorServer` over HTTP, since that
+# server fronts a live, in-process `SessionController` that a separate CLI
+# invocation cannot reach any other way (see hands/handoff/operator_server.py's
+# module docstring for why it is HTTP-enqueue-only in the first place).
+
+
+def _most_recent_run_dir(base: Path) -> Optional[Path]:
+    """The most recently modified subdirectory of `base`, or None if `base`
+    doesn't exist or has none. mtime, not name, so this is correct even for
+    run ids that don't happen to be lexicographically sortable."""
+    if not base.is_dir():
+        return None
+    candidates = [p for p in base.iterdir() if p.is_dir()]
+    if not candidates:
+        return None
+    return max(candidates, key=lambda p: p.stat().st_mtime)
+
+
+def _resolve_run_dir(run_dir_arg: Optional[str]) -> Path:
+    """`--run-dir` if given (must exist), otherwise the most recently
+    modified run under `config.EVIDENCE_RUNS` -- a clear SystemExit, never a
+    traceback, if neither resolves to anything."""
+    if run_dir_arg:
+        p = Path(run_dir_arg)
+        if not p.is_dir():
+            raise SystemExit(f"hands: --run-dir {run_dir_arg!r} is not a directory")
+        return p
+    found = _most_recent_run_dir(config.EVIDENCE_RUNS)
+    if found is None:
+        raise SystemExit(
+            f"hands: no --run-dir given and no runs found under {config.EVIDENCE_RUNS} "
+            "-- pass --run-dir explicitly"
+        )
+    return found
+
+
+def _cmd_operator_status(args: argparse.Namespace) -> int:
+    config.load_env()
+    run_dir = _resolve_run_dir(args.run_dir)
+    state_path = run_dir / "control_state.json"
+    if not state_path.is_file():
+        raise SystemExit(
+            f"hands: no control_state.json in {run_dir} "
+            "(not a handoff-capable run, or no control transition has happened yet)"
+        )
+    try:
+        raw = json.loads(state_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as e:
+        raise SystemExit(f"hands: could not read {state_path}: {e}")
+    # Validate through the real model, not just dict.get(): a field renamed
+    # in hands/schema/control.py should surface here as a clear error, not
+    # silently print `None` for whatever key moved.
+    try:
+        record = ControlStateRecord.model_validate(raw)
+    except ValidationError as e:
+        raise SystemExit(f"hands: {state_path} does not match the ControlStateRecord schema: {e}")
+
+    lines = [
+        f"run_dir: {run_dir}",
+        f"run_id: {record.run_id}",
+        f"state: {record.state.value}",
+        f"holder: {record.holder.value}",
+        f"epoch: {record.epoch}",
+    ]
+    if record.handoff_id:
+        lines.append(f"handoff_id: {record.handoff_id}")
+    lines.append(f"since: {record.since}")
+    if record.reason:
+        lines.append(f"reason: {record.reason}")
+    print("\n".join(lines))
+    return 0
+
+
+def _cmd_operator_list(args: argparse.Namespace) -> int:
+    config.load_env()
+    run_dir = _resolve_run_dir(args.run_dir)
+    files = sorted(run_dir.glob("intervention-*.json"))
+    if not files:
+        print(f"no interventions recorded in {run_dir}")
+        return 0
+    for f in files:
+        try:
+            raw = json.loads(f.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as e:
+            print(f"hands: skipping {f} (could not read): {e}", file=sys.stderr)
+            continue
+        try:
+            data = InterventionRequest.model_validate(raw)
+        except ValidationError as e:
+            print(f"hands: skipping {f} (does not match the InterventionRequest schema): {e}", file=sys.stderr)
+            continue
+        print(f"id: {data.id}  reason_code: {data.reason_code}  mode: {data.mode}")
+        if data.summary:
+            print(f"    summary: {data.summary}")
+    return 0
+
+
+def _operator_post(url: str, payload: dict[str, Any]) -> dict[str, Any]:
+    """POST `payload` as JSON to a running `OperatorServer` and return its
+    (also-JSON) body. Every server endpoint in `operator_server.py`'s HTTP
+    contract answers 202 the instant a command is enqueued (never waiting
+    for it to be applied -- see that module's docstring); anything else, or
+    a connection failure, becomes a one-line `SystemExit`, never a traceback.
+    """
+    import urllib.error
+    import urllib.request
+
+    body = json.dumps(payload).encode("utf-8")
+    req = urllib.request.Request(url, data=body, method="POST", headers={"Content-Type": "application/json"})
+    try:
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            status = resp.status
+            raw = resp.read()
+    except urllib.error.URLError as e:
+        raise SystemExit(f"hands: could not reach operator server at {url}: {e.reason if hasattr(e, 'reason') else e}")
+    if status != 202:
+        raise SystemExit(f"hands: operator server at {url} returned unexpected status {status}")
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError:
+        return {}
+
+
+def _cmd_operator_claim(args: argparse.Namespace) -> int:
+    config.load_env()
+    url = f"http://{args.host}:{args.port}/interventions/{args.intervention_id}/claim"
+    result = _operator_post(url, {"operator_id": args.operator_id})
+    print(f"claim queued for intervention {args.intervention_id!r} (operator_id={args.operator_id!r}): {result}")
+    return 0
+
+
+def _cmd_operator_resume(args: argparse.Namespace) -> int:
+    config.load_env()
+    payload: dict[str, Any] = {"resume_mode": args.mode}
+    if args.note:
+        payload["notes"] = args.note
+    url = f"http://{args.host}:{args.port}/interventions/{args.intervention_id}/resume"
+    result = _operator_post(url, payload)
+    print(f"resume (mode={args.mode!r}) queued for intervention {args.intervention_id!r}: {result}")
+    return 0
+
+
+def _cmd_operator_serve(args: argparse.Namespace) -> int:
+    """Start a bare operator HTTP console -- a fresh, page-less
+    `SessionController` (no live browser attached) wrapped in an
+    `OperatorServer` -- and drain queued commands against it until
+    interrupted. `claim`/`release`/`abort` all still go through the real
+    `SessionController` state machine and are persisted to
+    `control_state.json` in the printed run directory exactly as a live
+    discover/replay run's handoff would be; the only thing missing is an
+    actual Playwright page for `claim()` to install its human-action
+    recorder into (a command that needs one is caught and logged, not
+    crashed -- see `OperatorServer.drain`'s docstring).
+    """
+    config.load_env()
+    import time
+
+    from hands.handoff.controller import SessionController
+    from hands.handoff.operator_server import OperatorServer
+    from hands.schema.control import ControlState
+
+    policy = _load_policy(config.DEFAULT_POLICY)
+    root = Path(args.run_dir) if args.run_dir else config.EVIDENCE_RUNS
+    run_id = new_run_id("operator")
+    run_log = RunLog(root, run_id)
+    controller = SessionController(run_id, run_log, policy)
+
+    server = OperatorServer(controller, host=args.host, port=args.port)
+    bound_port = server.start()
+    print(f"hands operator server listening on http://{args.host}:{bound_port}/  (Ctrl+C to stop)")
+    print(f"run dir: {run_log.dir}")
+    # NOTE: --run-dir means something different for `status`/`list` -- it
+    # names the exact run directory to read, not a root a new one gets
+    # created under. Copy the FULL path printed above, not whatever
+    # --run-dir was passed to THIS command.
+    print(f"from another terminal: hands operator status --run-dir {run_log.dir}")
+    try:
+        while True:
+            server.drain(controller)
+            if controller.state in (ControlState.ABANDONED, ControlState.FINISHED):
+                print(f"run ended: {controller.state.value}")
+                break
+            time.sleep(0.2)
+    except KeyboardInterrupt:
+        print("hands: operator server stopped (Ctrl+C)")
+    finally:
+        server.stop()
+    return 0
+
+
+# ==========================================================================
 # argument parsing
 # ==========================================================================
 
@@ -694,6 +902,72 @@ def build_parser() -> argparse.ArgumentParser:
     i = sub.add_parser("inspect", help="Print a human-readable review of a saved capability artifact.")
     i.add_argument("capability_path", metavar="CAPABILITY_PATH")
     i.set_defaults(func=_cmd_inspect)
+
+    o = sub.add_parser(
+        "operator",
+        help="Operator console: inspect and drive a handoff from the terminal.",
+        description=(
+            "Read a run's control state / open interventions from disk (status, list), or drive an "
+            "already-running operator HTTP server (serve, claim, resume)."
+        ),
+    )
+    o_sub = o.add_subparsers(dest="operator_command", required=True)
+
+    o_serve = o_sub.add_parser(
+        "serve", help="Start a bare operator HTTP console (no live browser) for a new run."
+    )
+    o_serve.add_argument("--host", default="127.0.0.1")
+    o_serve.add_argument("--port", type=int, default=_DEFAULT_OPERATOR_PORT)
+    o_serve.add_argument(
+        "--run-dir", default=None,
+        help=(
+            f"Root directory under which to create the new run's evidence directory "
+            f"(default: {config.EVIDENCE_RUNS}). NOTE: this is a ROOT, not the run directory itself -- "
+            "pass the full path this command prints at startup to `status`/`list --run-dir`, not this value."
+        ),
+    )
+    o_serve.set_defaults(func=_cmd_operator_serve)
+
+    o_status = o_sub.add_parser(
+        "status", help="Print the current control state for a run, read from control_state.json on disk."
+    )
+    o_status.add_argument(
+        "--run-dir", default=None,
+        help=(
+            "The run's OWN evidence directory, e.g. evidence/runs/<run_id>/ (default: the most recently "
+            "modified run under evidence/runs/). Not the --run-dir root passed to `operator serve`."
+        ),
+    )
+    o_status.set_defaults(func=_cmd_operator_status)
+
+    o_list = o_sub.add_parser(
+        "list", help="List intervention requests recorded for a run, read from intervention-*.json on disk."
+    )
+    o_list.add_argument(
+        "--run-dir", default=None,
+        help=(
+            "The run's OWN evidence directory, e.g. evidence/runs/<run_id>/ (default: the most recently "
+            "modified run under evidence/runs/). Not the --run-dir root passed to `operator serve`."
+        ),
+    )
+    o_list.set_defaults(func=_cmd_operator_list)
+
+    o_claim = o_sub.add_parser("claim", help="Claim an open intervention on a running operator server.")
+    o_claim.add_argument("intervention_id", metavar="INTERVENTION_ID")
+    o_claim.add_argument("--operator-id", default="cli-operator")
+    o_claim.add_argument("--host", default="127.0.0.1")
+    o_claim.add_argument("--port", type=int, default=_DEFAULT_OPERATOR_PORT)
+    o_claim.set_defaults(func=_cmd_operator_claim)
+
+    o_resume = o_sub.add_parser(
+        "resume", help="Resume (or abort) a claimed intervention on a running operator server."
+    )
+    o_resume.add_argument("intervention_id", metavar="INTERVENTION_ID")
+    o_resume.add_argument("--mode", choices=("auto", "retry_step", "abort"), default="auto")
+    o_resume.add_argument("--note", default=None, metavar="TEXT")
+    o_resume.add_argument("--host", default="127.0.0.1")
+    o_resume.add_argument("--port", type=int, default=_DEFAULT_OPERATOR_PORT)
+    o_resume.set_defaults(func=_cmd_operator_resume)
 
     return p
 

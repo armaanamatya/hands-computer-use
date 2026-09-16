@@ -14,14 +14,11 @@ on disk are otherwise used completely unmodified.
 from __future__ import annotations
 
 import json
-import threading
 from pathlib import Path
 from typing import Any
 
 import pytest
 import yaml
-from playwright.sync_api import sync_playwright
-from werkzeug.serving import make_server
 
 from hands.replay.engine import HumanResolution, ReplayEngine
 from hands.safety.policy import Policy
@@ -29,7 +26,6 @@ from hands.schema.capability import Capability
 from hands.schema.result import RunStatus
 from hands.evidence.run_log import RunLog
 from hands.surface.web import WebSurface
-from mockbank.app import app as flask_app
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 CAPABILITY_PATH = REPO_ROOT / "capabilities" / "lookup_savings_balance.json"
@@ -40,32 +36,10 @@ POLICY_YAML_PATH = REPO_ROOT / "policy.yaml"
 # --------------------------------------------------------------------------
 # Fixtures
 # --------------------------------------------------------------------------
-
-
-@pytest.fixture(scope="session")
-def mock_server():
-    """Run the real LegacyCore mock app on a free localhost port, in a
-    background thread, for the whole test session. `threaded=True` matters:
-    the frameset loads `/nav` and `/main` as two concurrent requests, and a
-    single-threaded dev server can stall on that.
-    """
-    srv = make_server("127.0.0.1", 0, flask_app, threaded=True)
-    port = srv.server_port
-    t = threading.Thread(target=srv.serve_forever, daemon=True)
-    t.start()
-    try:
-        yield port
-    finally:
-        srv.shutdown()
-        t.join(timeout=5)
-
-
-@pytest.fixture(scope="session")
-def browser():
-    with sync_playwright() as p:
-        b = p.chromium.launch(headless=True)
-        yield b
-        b.close()
+#
+# `mock_server` and `browser` are shared, session-scoped fixtures defined in
+# tests/conftest.py (one Flask mock app, one Playwright browser for the
+# whole test session -- see that module's docstring for why).
 
 
 @pytest.fixture

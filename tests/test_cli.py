@@ -18,16 +18,13 @@ from __future__ import annotations
 
 import json
 import re
-import threading
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any
 
 import pytest
-from werkzeug.serving import make_server
 
 from hands.cli import main
 from hands.schema.capability import Capability
-from mockbank.app import app as flask_app
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 CAPABILITY_PATH = REPO_ROOT / "capabilities" / "lookup_savings_balance.json"
@@ -39,23 +36,15 @@ MOCKBANK_PASSWORD = "Passw0rd!"
 # --------------------------------------------------------------------------
 # Fixtures
 # --------------------------------------------------------------------------
-
-
-@pytest.fixture(scope="module")
-def mock_server() -> Iterator[int]:
-    """The real LegacyCore mock app, on a free localhost port, for the
-    whole module -- same pattern as tests/test_replay.py and
-    tests/test_agent_loop.py.
-    """
-    srv = make_server("127.0.0.1", 0, flask_app, threaded=True)
-    port = srv.server_port
-    t = threading.Thread(target=srv.serve_forever, daemon=True)
-    t.start()
-    try:
-        yield port
-    finally:
-        srv.shutdown()
-        t.join(timeout=5)
+#
+# `mock_server` (yields the mock app's PORT, same shape this file always
+# used) is a shared, session-scoped fixture defined in tests/conftest.py.
+# This file never touches Playwright directly -- `main()`'s own `replay`/
+# `discover` subcommands open and close their own `sync_playwright()`
+# context per call (hands/cli.py's `_cmd_replay` / `_cmd_discover`) -- so it
+# does not use the shared `browser` fixture; see conftest.py's
+# `pytest_collection_modifyitems` for how this file's tests are kept from
+# overlapping with that shared fixture's lifetime.
 
 
 def _base_url(port: int) -> str:

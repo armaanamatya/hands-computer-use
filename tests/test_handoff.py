@@ -24,7 +24,6 @@ Test 4 (end-to-end handoff) is provided as BOTH variants the brief allows:
 from __future__ import annotations
 
 import json
-import threading
 import urllib.request
 from dataclasses import replace
 from pathlib import Path
@@ -32,19 +31,16 @@ from typing import Any
 
 import pytest
 import yaml
-from playwright.sync_api import sync_playwright
-from werkzeug.serving import make_server
 
 from hands.evidence.run_log import RunLog
 from hands.handoff import OperatorServer, SessionController, SimulatedOperator, make_escalation_handler
 from hands.replay.engine import ReplayEngine
 from hands.safety.policy import Policy
 from hands.schema.capability import Capability
-from hands.schema.control import ControlState, InterventionRequest, NotInControl
+from hands.schema.control import ControlHolder, ControlState, ControlToken, InterventionRequest, NotInControl
 from hands.schema.result import RunStatus
 from hands.surface.base import Action
 from hands.surface.web import WebSurface
-from mockbank.app import app as flask_app
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 CAPABILITY_PATH = REPO_ROOT / "capabilities" / "lookup_savings_balance.json"
@@ -56,50 +52,12 @@ VALID_INPUTS = {"username": "teller1", "password": "Passw0rd!", "member_id": "12
 # --------------------------------------------------------------------------
 # Fixtures
 # --------------------------------------------------------------------------
-
-
-@pytest.fixture(scope="session")
-def mock_server():
-    srv = make_server("127.0.0.1", 0, flask_app, threaded=True)
-    port = srv.server_port
-    t = threading.Thread(target=srv.serve_forever, daemon=True)
-    t.start()
-    try:
-        yield port
-    finally:
-        srv.shutdown()
-        t.join(timeout=5)
-
-
-@pytest.fixture(scope="module")
-def browser():
-    # module-, not session-, scoped: tests/test_replay.py (owned by another
-    # agent, not modified here) declares its own session-scoped `browser`
-    # fixture using the same `sync_playwright()` context manager.
-    # Playwright's sync API only tolerates one such context being open at a
-    # time per process -- a SECOND `with sync_playwright()` while a first
-    # one is still open raises "already inside the asyncio loop". Scoping
-    # THIS fixture to the module means it is fully torn down as soon as
-    # this file's tests finish, before test_replay.py's own (session-
-    # scoped, so alive until the whole run ends) fixture ever starts.
-    #
-    # This makes `uv run pytest -q` and `uv run pytest tests/test_handoff.py
-    # -q` (this file's two Done-criteria invocations) reliable: pytest's
-    # default collection sorts tests/ alphabetically, so test_handoff.py
-    # always runs (and this fixture always tears down) before test_replay.py
-    # starts -- verified by running the full suite twice in a row. It is
-    # NOT bulletproof against every possible invocation: `pytest
-    # tests/test_replay.py tests/test_handoff.py` (test_replay.py's path
-    # given first, forcing it to collect and open its session-scoped
-    # fixture before this one) reproduces the same "already inside the
-    # asyncio loop" error, in test_replay.py's fixture this time -- and
-    # there is no fix available from this side of that boundary short of a
-    # shared tests/conftest.py, which is outside the set of files this
-    # module is scoped to create or modify.
-    with sync_playwright() as p:
-        b = p.chromium.launch(headless=True)
-        yield b
-        b.close()
+#
+# `mock_server` and `browser` are shared, session-scoped fixtures defined in
+# tests/conftest.py (one Flask mock app, one Playwright browser for the
+# whole test session, so this file and tests/test_replay.py can no longer
+# collide over Playwright's single-open-context restriction regardless of
+# which one pytest collects/opens first -- see that module's docstring).
 
 
 @pytest.fixture
@@ -331,6 +289,53 @@ def test_stale_automation_token_rejected_after_human_claims(browser, policy, tmp
         controller.release(handoff_id, resume_mode="auto")
         fresh_token = controller.resume()
         assert surface.act(Action(kind="wait", ms=10), fresh_token).ok
+    finally:
+        context.close()
+
+
+# --------------------------------------------------------------------------
+# 2b. guard() answers from ONE source: live state, not just holder+epoch
+# --------------------------------------------------------------------------
+
+
+def test_guard_rejects_holder_and_epoch_matching_token_once_human_active(browser, policy, tmp_path):
+    """A token whose `holder`/`epoch` fields happen to be correct must still
+    be rejected while a human actually holds the session. Before this
+    guarantee existed, `guard()` validated the token ENTIRELY intrinsically
+    (its own holder + its own epoch against the current epoch) -- so a
+    forged/reconstructed token with holder=automation and epoch set to
+    whatever the CURRENT epoch happens to be would pass, even though the
+    controller's own live state says a human is in control.
+
+    To prove this test is actually exercising the new live-state check (and
+    not just re-proving test 2's epoch check), `forged_token` is built AFTER
+    `claim()` with its epoch manually set to `controller.epoch` -- i.e. it
+    would satisfy the OLD guard()'s condition
+    (`holder == AUTOMATION and epoch == self._epoch`) completely. Only the
+    added `state == AUTOMATION_ACTIVE` check can reject it.
+    """
+    run_log = _new_run_log(tmp_path, "test2b-guard-live-state")
+    context, page, controller, surface = _new_session(browser, "test2b-guard-live-state", run_log, policy)
+    try:
+        req = InterventionRequest(
+            id="test2b-iv1", run_id="test2b-guard-live-state", mode="replay",
+            reason_code="STUCK_NO_PROGRESS", summary="automation is stuck",
+        )
+        handoff_id = controller.request_handoff(req)
+        controller.claim(handoff_id, "operator-1")
+        assert controller.state == ControlState.HUMAN_ACTIVE
+        assert controller.epoch == 1
+
+        # holder=automation, epoch == the CURRENT epoch: this satisfies the
+        # OLD guard()'s check completely.
+        forged_token = ControlToken(run_id=controller.run_id, holder=ControlHolder.AUTOMATION, epoch=controller.epoch)
+        assert forged_token.holder == ControlHolder.AUTOMATION
+        assert forged_token.epoch == controller.epoch
+
+        with pytest.raises(NotInControl):
+            controller.guard(forged_token)
+        with pytest.raises(NotInControl):
+            surface.act(Action(kind="wait", ms=10), forged_token)
     finally:
         context.close()
 

@@ -6,16 +6,15 @@ Element indices used in the scripts below were confirmed against the running
 mock app (see the frame/element dump each stage produces); they are stable
 because the app is server-rendered with no client-side JS altering the DOM.
 
-All five tests transitively depend on the `browser` fixture, which calls
-`pytest.skip(...)` if Chromium cannot be launched - that is what lets this
-suite be skipped in an environment with no browser, without a custom pytest
-marker (this file may not touch pyproject.toml / conftest.py).
+All five tests transitively depend on the `browser` fixture (shared,
+session-scoped, defined in tests/conftest.py), which calls `pytest.skip(...)`
+if Chromium cannot be launched - that is what lets this suite be skipped in
+an environment with no browser.
 """
 from __future__ import annotations
 
-import threading
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any
 
 import pytest
 
@@ -33,42 +32,13 @@ MOCKBANK_PASSWORD = "Passw0rd!"
 
 
 # --------------------------------------------------------------------- fixtures
-
-@pytest.fixture(scope="module")
-def mock_server() -> Iterator[str]:
-    from werkzeug.serving import make_server
-
-    from mockbank.app import app
-
-    srv = make_server("127.0.0.1", 0, app, threaded=True)
-    port = srv.socket.getsockname()[1]
-    t = threading.Thread(target=srv.serve_forever, daemon=True)
-    t.start()
-    try:
-        yield f"http://127.0.0.1:{port}"
-    finally:
-        srv.shutdown()
-        t.join(timeout=5)
+#
+# `mock_server` (yields the mock app's PORT) and `browser` are shared,
+# session-scoped fixtures defined in tests/conftest.py.
 
 
-@pytest.fixture(scope="module")
-def browser():
-    try:
-        from playwright.sync_api import sync_playwright
-    except ImportError:
-        pytest.skip("playwright is not installed")
-        return
-
-    pw = sync_playwright().start()
-    try:
-        b = pw.chromium.launch(headless=True)
-    except Exception as e:  # noqa: BLE001 - any launch failure means "skip", not "fail"
-        pw.stop()
-        pytest.skip(f"Chromium is not available: {e}")
-        return
-    yield b
-    b.close()
-    pw.stop()
+def _base_url(port: int) -> str:
+    return f"http://127.0.0.1:{port}"
 
 
 @pytest.fixture()
@@ -136,14 +106,14 @@ _HAPPY_PATH_SCRIPT: list[dict[str, Any]] = [
 
 
 @pytest.fixture(scope="module")
-def happy_path_result(tmp_path_factory: pytest.TempPathFactory, mock_server: str, browser: Any) -> tuple[DiscoveryTrace, RunLog]:
+def happy_path_result(tmp_path_factory: pytest.TempPathFactory, mock_server: int, browser: Any) -> tuple[DiscoveryTrace, RunLog]:
     tmp_path = tmp_path_factory.mktemp("happy")
     pg = browser.new_page()
     try:
         trace, run_log = _make_loop(
             tmp_path,
             pg,
-            mock_server + "/",
+            _base_url(mock_server) + "/",
             goal="Sign on, look up member 12345, and report the savings account's current balance.",
             script=_HAPPY_PATH_SCRIPT,
             inputs={"username": "teller1", "password": MOCKBANK_PASSWORD, "member_id": "12345"},
@@ -187,7 +157,7 @@ def test_every_trace_step_has_a_reason(happy_path_result: tuple[DiscoveryTrace, 
 
 # --------------------------------------------------------------------- test 3
 
-def test_dead_end_detection_stops_run(tmp_path: Path, mock_server: str, page: Any) -> None:
+def test_dead_end_detection_stops_run(tmp_path: Path, mock_server: int, page: Any) -> None:
     # The menu frame's "Home" link (idx 2) is stable across observations and,
     # unauthenticated, clicking it just reloads the same sign-on screen each
     # time - a genuine no-op repeated four times.
@@ -195,7 +165,7 @@ def test_dead_end_detection_stops_run(tmp_path: Path, mock_server: str, page: An
     trace, _ = _make_loop(
         tmp_path,
         page,
-        mock_server + "/",
+        _base_url(mock_server) + "/",
         goal="Keep returning to the home screen.",
         script=script,
     )
@@ -207,7 +177,7 @@ def test_dead_end_detection_stops_run(tmp_path: Path, mock_server: str, page: An
 
 # --------------------------------------------------------------------- test 4
 
-def test_request_human_produces_intervention(tmp_path: Path, mock_server: str, page: Any) -> None:
+def test_request_human_produces_intervention(tmp_path: Path, mock_server: int, page: Any) -> None:
     script = [
         {
             "tool": "request_human",
@@ -220,7 +190,7 @@ def test_request_human_produces_intervention(tmp_path: Path, mock_server: str, p
     trace, run_log = _make_loop(
         tmp_path,
         page,
-        mock_server + "/",
+        _base_url(mock_server) + "/",
         goal="Do something this application cannot be made to do.",
         script=script,
     )

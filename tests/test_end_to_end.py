@@ -13,9 +13,8 @@ test here is the recorder/replay contract, not the model.
 """
 from __future__ import annotations
 
-import threading
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any
 
 import pytest
 
@@ -54,21 +53,12 @@ DISCOVERY_SCRIPT: list[dict[str, Any]] = [
 ]
 
 
-@pytest.fixture(scope="module")
-def mock_server() -> Iterator[str]:
-    from werkzeug.serving import make_server
+# `mock_server` (yields the mock app's PORT) and `browser` are shared,
+# session-scoped fixtures defined in tests/conftest.py.
 
-    from mockbank.app import app
 
-    srv = make_server("127.0.0.1", 0, app, threaded=True)
-    port = srv.socket.getsockname()[1]
-    t = threading.Thread(target=srv.serve_forever, daemon=True)
-    t.start()
-    try:
-        yield f"http://127.0.0.1:{port}"
-    finally:
-        srv.shutdown()
-        t.join(timeout=5)
+def _base_url(port: int) -> str:
+    return f"http://127.0.0.1:{port}"
 
 
 def _policy_for(base_url: str) -> Policy:
@@ -86,28 +76,10 @@ def _policy_for(base_url: str) -> Policy:
 
 
 @pytest.fixture(scope="module")
-def browser() -> Iterator[Any]:
-    try:
-        from playwright.sync_api import sync_playwright
-    except ImportError:  # pragma: no cover
-        pytest.skip("playwright is not installed")
-        return
-    pw = sync_playwright().start()
-    try:
-        b = pw.chromium.launch(headless=True)
-    except Exception as e:  # noqa: BLE001
-        pw.stop()
-        pytest.skip(f"Chromium is not available: {e}")
-        return
-    yield b
-    b.close()
-    pw.stop()
-
-
-@pytest.fixture(scope="module")
-def recorded(tmp_path_factory: pytest.TempPathFactory, mock_server: str, browser: Any):
+def recorded(tmp_path_factory: pytest.TempPathFactory, mock_server: int, browser: Any):
     """Run discovery once, then record the trace into a Capability."""
     tmp_path = tmp_path_factory.mktemp("e2e_discover")
+    base_url = _base_url(mock_server)
     inputs = {"username": "teller1", "password": MOCKBANK_PASSWORD, "member_id": "12345"}
     redactor = Redactor({"password": MOCKBANK_PASSWORD})
     run_id = new_run_id("e2e-discover")
@@ -126,7 +98,7 @@ def recorded(tmp_path_factory: pytest.TempPathFactory, mock_server: str, browser
             control_token=ControlToken(run_id=run_id, holder=ControlHolder.AUTOMATION, epoch=0),
             max_steps=20,
             run_timeout_s=120,
-            entry_url=mock_server + "/",
+            entry_url=base_url + "/",
         )
         trace = loop.run()
     finally:
@@ -145,14 +117,14 @@ def recorded(tmp_path_factory: pytest.TempPathFactory, mock_server: str, browser
             "member_id": InputSpec(type="string", description="Member number to look up."),
         },
         outputs_spec={"savings_balance": OutputSpec(type="money", description="Savings current balance.")},
-        policy=_policy_for(mock_server),
+        policy=_policy_for(base_url),
         redactor=redactor,
-        entry_url=mock_server + "/",
+        entry_url=base_url + "/",
         app=AppInfo(vendor="LegacyCore", product="CBS", version="7.2"),
         discovery_run_id=run_id,
         inputs=inputs,
     )
-    inputs["__base_url"] = mock_server + "/"
+    inputs["__base_url"] = base_url + "/"
     return result, inputs
 
 
