@@ -871,8 +871,38 @@ def _build_checkpoint(
     if after_path is not None and before_path != after_path:
         pattern = _path_pattern(after_path)
         frame = FrameMatcher(url_pattern=pattern)
-        cond: Condition = UrlMatches(pattern=pattern, frame=frame)
-        return Checkpoint(condition=cond, description=f"work frame navigated to path {after_path!r}")
+        url_cond: Condition = UrlMatches(pattern=pattern, frame=frame)
+
+        # A URL alone is too weak a checkpoint whenever a path serves more
+        # than one outcome, which in a back-office app is most of them: a
+        # member lookup that finds nothing, that hits a busy host, or that
+        # 500s all still land on the member path. Accepting the step on the
+        # URL then lets replay walk on and fail later with "unexpected
+        # screen", which tells a caller only that something is wrong, never
+        # which business outcome occurred -- and it means a declared outcome
+        # like MEMBER_NOT_FOUND never gets the chance to fire, because the
+        # checkpoint was already satisfied.
+        #
+        # So the checkpoint also asserts the destination's document title,
+        # which is what distinguishes those pages from one another ("Member
+        # Detail" vs "Member Inquiry" vs "System Busy" vs "Error"). It is the
+        # same signal used to identify a screen, and for the same reason: the
+        # application chose it to name the page, and it does not vary with
+        # the record being displayed.
+        after_title = _unique_frame_title([after_obs], [0], work_index)
+        before_title = _unique_frame_title([before_obs], [0], work_index)
+        if after_title and after_title != before_title:
+            cond: Condition = AllOf(
+                conditions=[
+                    url_cond,
+                    TitleMatches(pattern=re.escape(after_title), frame=frame),
+                ]
+            )
+            return Checkpoint(
+                condition=cond,
+                description=f"work frame navigated to path {after_path!r} showing {after_title!r}",
+            )
+        return Checkpoint(condition=url_cond, description=f"work frame navigated to path {after_path!r}")
 
     before_frags = _element_fragments(before_obs, work_index)
     after_frags = _element_fragments(after_obs, work_index)
