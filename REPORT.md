@@ -51,6 +51,14 @@ Recovery never blindly re-runs a step: it evaluates the idempotency check first,
 
 Two linting passes keep recorded artifacts honest, both pure functions over recorded observations. A checkpoint must be false before its action and true after; one that was already true proves nothing and would let replay "verify" a click that never happened. An outcome detector must not match the success page, or a loose "not found" pattern silently shadows a successful run.
 
+Two later defects came from running the whole scenario matrix against a *recorded* artifact rather than the hand-authored one, and both are about this evaluation order rather than about typos.
+
+The first: outcomes were never merged into recorded artifacts. The recorder always supported a curated per-app library, for the reason given above, but nothing wired it up, so every recorded capability shipped with no detectors at all.
+
+The second is the more interesting one. A recorded checkpoint asserted only that the work frame had reached the `/member` path. That path serves the found, not-found, busy and error pages alike, so the checkpoint passed on all of them; and because a checkpoint is evaluated *before* global outcomes, a declared `MEMBER_NOT_FOUND` never got the chance to match. Replay accepted the step and failed one step later with "unexpected screen", which tells a caller that something is wrong but never which business outcome occurred. A checkpoint after a navigation now also asserts the destination's document title, which is what actually separates those pages. That is the same insight as the screen-landmark fix below, arrived at independently from the other direction.
+
+Together they moved a recorded artifact from reporting `UNEXPECTED_SCREEN` for every non-happy path to matching the hand-authored one exactly: `SUCCESS`, `MEMBER_NOT_FOUND`, recovered-then-`SUCCESS`, `ACCOUNT_RESTRICTED`, `APP_ERROR`.
+
 The most useful thing I built was the test that replays an artifact the **recorder itself produced**. Until then, discovery and replay were each tested against the other's stand-in. That join found four real defects, and one is worth stating plainly: the recorder chose screen landmarks by finding text unique to each screen in the discovery run, and on the member detail screen the most distinctive text was the member's own data. It landmarked that screen on `LN`, the loan row of the one member used during discovery, so the artifact replayed perfectly for member 12345 and rejected the member screen for every member without a loan account. That is exactly the difference between a recording and a capability. Screens are now identified by the work frame's document title, which the application chose to name the screen and which does not vary by record.
 
 ## Heterogeneity & multi-tenant
