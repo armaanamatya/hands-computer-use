@@ -1,0 +1,48 @@
+# Operator-owned guardrails. This file is data, not code, because the
+# allowlist is exactly the kind of thing an institution's security team must
+# be able to review and change without touching Python.
+#
+# Effective policy at runtime = this file INTERSECT the capability's own
+# `policy` block. The narrower set always wins, so a capability can only ever
+# restrict what is permitted here, never widen it.
+#
+# NOTE ON QUOTING: every regex below is SINGLE-quoted on purpose. In
+# double-quoted YAML a backslash is an escape character, so "\b" silently
+# becomes a backspace (U+0008) rather than a regex word boundary, and the
+# risky-action patterns would then match nothing at all -- a guardrail that
+# fails open without any error. Single-quoted YAML treats backslashes as
+# literal. There is a test that loads this file and asserts the patterns
+# still match a real risky control name.
+
+allowed_domains:
+  - '127.0.0.1'
+  - 'localhost'
+allowed_url_patterns:
+  - '^http://(127\.0\.0\.1|localhost):5050(/.*)?$'
+allowed_actions: [navigate, click, type, select, press, extract, wait]
+
+# Risk classification. A step whose target name matches a risky pattern is
+# recorded with risk.level=risky and requires_confirmation=true. At replay a
+# risky step on a non-approved capability is routed to a human unless the
+# caller passes --approved-by, which is recorded in the result.
+#
+# The risky class is about irreversible side effects on the institution's
+# records, not about whether the automation might get something wrong.
+risky_patterns:
+  - '(?i)\b(open|create|submit|confirm|transfer|close|delete|approve|post)\b'
+risky_mode: gate          # gate | block | allow
+
+# Coordinate (bbox) fallback is the last-resort locator strategy for surfaces
+# with no usable DOM. Using it sets a drift signal on the run.
+allow_coordinate_fallback: true
+
+# Human handoff. Values typed by a human operator are never captured unless
+# this is true (demo only).
+capture_human_input_values: false
+human_wait_timeout_s: 600
+
+# Budgets
+max_steps: 40
+step_timeout_ms: 10000
+run_timeout_s: 300
+recovery_budget: 5
