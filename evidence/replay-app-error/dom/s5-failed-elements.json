@@ -1,0 +1,262 @@
+[
+  {
+    "idx": 1,
+    "role": "cell",
+    "name": "LegacyCore",
+    "tag": "td",
+    "frame_index": 1,
+    "frame_url": "http://127.0.0.1:5050/nav",
+    "bbox": {
+      "x": 4,
+      "y": 4,
+      "w": 162,
+      "h": 26
+    },
+    "page_bbox": {
+      "x": 4,
+      "y": 4,
+      "w": 162,
+      "h": 26
+    },
+    "structural": "html>body:nth-of-type(1)>font:nth-of-type(1)>table:nth-of-type(1)>tbody:nth-of-type(1)>tr:nth-of-type(1)>td:nth-of-type(1)",
+    "row_ctx": {
+      "row_index": 0,
+      "headers": [
+        "LegacyCore"
+      ],
+      "cells": [
+        "LegacyCore"
+      ],
+      "table_path": "html>body:nth-of-type(1)>font:nth-of-type(1)>table:nth-of-type(1)"
+    },
+    "attrs": {}
+  },
+  {
+    "idx": 2,
+    "role": "link",
+    "name": "Home",
+    "tag": "a",
+    "frame_index": 1,
+    "frame_url": "http://127.0.0.1:5050/nav",
+    "bbox": {
+      "x": 8,
+      "y": 34,
+      "w": 42.6875,
+      "h": 17
+    },
+    "page_bbox": {
+      "x": 8,
+      "y": 34,
+      "w": 42.6875,
+      "h": 17
+    },
+    "structural": "html>body:nth-of-type(1)>font:nth-of-type(1)>table:nth-of-type(1)>tbody:nth-of-type(1)>tr:nth-of-type(2)>td:nth-of-type(1)>a:nth-of-type(1)",
+    "row_ctx": {
+      "row_index": 1,
+      "headers": [
+        "LegacyCore"
+      ],
+      "cells": [
+        "Home"
+      ],
+      "table_path": "html>body:nth-of-type(1)>font:nth-of-type(1)>table:nth-of-type(1)"
+    },
+    "attrs": {
+      "href": "/main"
+    }
+  },
+  {
+    "idx": 3,
+    "role": "link",
+    "name": "Member Inquiry",
+    "tag": "a",
+    "frame_index": 1,
+    "frame_url": "http://127.0.0.1:5050/nav",
+    "bbox": {
+      "x": 8,
+      "y": 60,
+      "w": 111.15625,
+      "h": 17
+    },
+    "page_bbox": {
+      "x": 8,
+      "y": 60,
+      "w": 111.15625,
+      "h": 17
+    },
+    "structural": "html>body:nth-of-type(1)>font:nth-of-type(1)>table:nth-of-type(1)>tbody:nth-of-type(1)>tr:nth-of-type(3)>td:nth-of-type(1)>a:nth-of-type(1)",
+    "row_ctx": {
+      "row_index": 2,
+      "headers": [
+        "LegacyCore"
+      ],
+      "cells": [
+        "Member Inquiry"
+      ],
+      "table_path": "html>body:nth-of-type(1)>font:nth-of-type(1)>table:nth-of-type(1)"
+    },
+    "attrs": {
+      "href": "/lookup"
+    }
+  },
+  {
+    "idx": 4,
+    "role": "link",
+    "name": "Sign Off",
+    "tag": "a",
+    "frame_index": 1,
+    "frame_url": "http://127.0.0.1:5050/nav",
+    "bbox": {
+      "x": 8,
+      "y": 86,
+      "w": 57.515625,
+      "h": 17
+    },
+    "page_bbox": {
+      "x": 8,
+      "y": 86,
+      "w": 57.515625,
+      "h": 17
+    },
+    "structural": "html>body:nth-of-type(1)>font:nth-of-type(1)>table:nth-of-type(1)>tbody:nth-of-type(1)>tr:nth-of-type(4)>td:nth-of-type(1)>a:nth-of-type(1)",
+    "row_ctx": {
+      "row_index": 3,
+      "headers": [
+        "LegacyCore"
+      ],
+      "cells": [
+        "Sign Off"
+      ],
+      "table_path": "html>body:nth-of-type(1)>font:nth-of-type(1)>table:nth-of-type(1)"
+    },
+    "attrs": {
+      "href": "javascript:parent.work.location='/signoff'"
+    }
+  },
+  {
+    "idx": 5,
+    "role": "cell",
+    "name": "Quick Search",
+    "tag": "td",
+    "frame_index": 1,
+    "frame_url": "http://127.0.0.1:5050/nav",
+    "bbox": {
+      "x": 4,
+      "y": 108,
+      "w": 162,
+      "h": 63
+    },
+    "page_bbox": {
+      "x": 4,
+      "y": 108,
+      "w": 162,
+      "h": 63
+    },
+    "structural": "html>body:nth-of-type(1)>font:nth-of-type(1)>table:nth-of-type(1)>tbody:nth-of-type(1)>tr:nth-of-type(5)>td:nth-of-type(1)",
+    "row_ctx": {
+      "row_index": 4,
+      "headers": [
+        "LegacyCore"
+      ],
+      "cells": [
+        "Quick Search"
+      ],
+      "table_path": "html>body:nth-of-type(1)>font:nth-of-type(1)>table:nth-of-type(1)"
+    },
+    "attrs": {}
+  },
+  {
+    "idx": 6,
+    "role": "textbox",
+    "name": "mno",
+    "tag": "input",
+    "frame_index": 1,
+    "frame_url": "http://127.0.0.1:5050/nav",
+    "bbox": {
+      "x": 8,
+      "y": 130,
+      "w": 86,
+      "h": 21
+    },
+    "page_bbox": {
+      "x": 8,
+      "y": 130,
+      "w": 86,
+      "h": 21
+    },
+    "structural": "html>body:nth-of-type(1)>font:nth-of-type(1)>table:nth-of-type(1)>tbody:nth-of-type(1)>tr:nth-of-type(5)>td:nth-of-type(1)>form:nth-of-type(1)>input:nth-of-type(1)",
+    "row_ctx": {
+      "row_index": 4,
+      "headers": [
+        "LegacyCore"
+      ],
+      "cells": [
+        "Quick Search"
+      ],
+      "table_path": "html>body:nth-of-type(1)>font:nth-of-type(1)>table:nth-of-type(1)"
+    },
+    "attrs": {
+      "type": "text",
+      "name": "mno",
+      "value": ""
+    }
+  },
+  {
+    "idx": 7,
+    "role": "button",
+    "name": "Search",
+    "tag": "input",
+    "frame_index": 1,
+    "frame_url": "http://127.0.0.1:5050/nav",
+    "bbox": {
+      "x": 98.453125,
+      "y": 130,
+      "w": 58.25,
+      "h": 21
+    },
+    "page_bbox": {
+      "x": 98.453125,
+      "y": 130,
+      "w": 58.25,
+      "h": 21
+    },
+    "structural": "html>body:nth-of-type(1)>font:nth-of-type(1)>table:nth-of-type(1)>tbody:nth-of-type(1)>tr:nth-of-type(5)>td:nth-of-type(1)>form:nth-of-type(1)>input:nth-of-type(2)",
+    "row_ctx": {
+      "row_index": 4,
+      "headers": [
+        "LegacyCore"
+      ],
+      "cells": [
+        "Quick Search"
+      ],
+      "table_path": "html>body:nth-of-type(1)>font:nth-of-type(1)>table:nth-of-type(1)"
+    },
+    "attrs": {
+      "type": "submit",
+      "value": "Search"
+    }
+  },
+  {
+    "idx": 8,
+    "role": "text",
+    "name": "Internal Server Error The request could not be completed. The host returned an unexpected error. Reference: CBS-0500 Contact the help desk if the problem persis",
+    "tag": "body",
+    "frame_index": 2,
+    "frame_url": "http://127.0.0.1:5050/member?mno=50000&lnm=",
+    "bbox": {
+      "x": 8,
+      "y": 8,
+      "w": 1092,
+      "h": 704
+    },
+    "page_bbox": {
+      "x": 180,
+      "y": 8,
+      "w": 1092,
+      "h": 704
+    },
+    "structural": "html>body:nth-of-type(1)",
+    "row_ctx": null,
+    "attrs": {}
+  }
+]

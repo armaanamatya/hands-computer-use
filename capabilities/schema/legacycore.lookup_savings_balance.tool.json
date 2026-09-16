@@ -1,40 +1,39 @@
 {
-  "name": "Look up savings balance",
-  "description": "Signs on to LegacyCore, looks up a member by id, and extracts their current savings balance.",
+  "name": "Look up member savings balance",
+  "description": "Sign on, look up the member, and read their savings account current balance.",
   "input_schema": {
     "type": "object",
     "properties": {
-      "member_id": {
-        "type": "string",
-        "description": "Member number to look up",
-        "pattern": "^\\d{5}$",
-        "examples": [
-          "12345"
-        ]
-      },
       "username": {
         "type": "string",
-        "description": "Teller sign-on username",
+        "description": "Run input",
         "examples": [
           "teller1"
         ]
       },
       "password": {
         "type": "string",
-        "description": "Teller sign-on password (supplied from a vault; never echoed)"
+        "description": "Sensitive credential, supplied from a vault at run time (supplied from a vault; never echoed)"
+      },
+      "member_id": {
+        "type": "string",
+        "description": "Run input",
+        "examples": [
+          "12345"
+        ]
       }
     },
     "required": [
-      "member_id",
       "username",
-      "password"
+      "password",
+      "member_id"
     ],
     "additionalProperties": false
   },
   "outputs": {
     "savings_balance": {
       "type": "string",
-      "description": "The member's current savings balance"
+      "description": "Captured output 'savings_balance'"
     }
   },
   "outcome_codes": [
@@ -43,6 +42,8 @@
     "SYSTEM_BUSY",
     "SESSION_EXPIRED",
     "APP_ERROR",
+    "VALIDATION_ERROR",
+    "SUPERVISOR_OVERRIDE_REQUIRED",
     "UNEXPECTED_CONFIRM"
   ],
   "side_effects": "reads",

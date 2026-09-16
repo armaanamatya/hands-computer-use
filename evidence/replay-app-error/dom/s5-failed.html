@@ -1,0 +1,40 @@
+<!-- frame 0 name='' url=http://127.0.0.1:5050/ -->
+<html><head><title>LegacyCore Teller Workstation</title></head>
+<frameset cols="170,*" border="2" framespacing="2">
+<frame src="/nav" name="menu" scrolling="no" marginwidth="4" marginheight="4">
+<frame src="/main" name="work" marginwidth="8" marginheight="8">
+</frameset>
+</html>
+
+<!-- frame 1 name='menu' url=http://127.0.0.1:5050/nav -->
+<html><head><title>Menu</title>
+<style>body{background:#d4d0c8;margin:4px} .c1{background:#000080;color:#fff;font-weight:bold} .c2{background:#e8e8e8}</style>
+</head>
+<body marginwidth="4" marginheight="4">
+<font face="Arial" size="2">
+<table width="100%" border="0" cellpadding="4" cellspacing="0">
+<tbody><tr><td class="c1">LegacyCore</td></tr>
+<tr><td><a href="/main" target="work">Home</a></td></tr>
+<tr><td><a href="/lookup" target="work">Member Inquiry</a></td></tr>
+<tr><td><a href="javascript:parent.work.location='/signoff'">Sign Off</a></td></tr>
+<tr><td class="c2">Quick Search<br>
+<form action="/member" method="get" target="work">
+<input type="text" name="mno" size="7" style=""> <input type="submit" value="Search" style="">
+</form>
+</td></tr>
+</tbody></table>
+</font>
+
+</body></html>
+
+<!-- frame 2 name='work' url=http://127.0.0.1:5050/member?mno=50000&lnm= -->
+<html><head><title>Error</title></head>
+<body bgcolor="#ffffff" marginwidth="8" marginheight="8">
+<font face="Courier New" size="2">
+<b>Internal Server Error</b><br><br>
+The request could not be completed. The host returned an unexpected error.<br>
+Reference: CBS-0500<br><br>
+Contact the help desk if the problem persists.
+</font>
+
+</body></html>

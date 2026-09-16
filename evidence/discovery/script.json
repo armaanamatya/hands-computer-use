@@ -1,0 +1,56 @@
+[
+  {
+    "tool": "type_text",
+    "input": {
+      "element": 11,
+      "text": "{{username}}",
+      "reason": "enter the teller user id so the session can be signed on"
+    }
+  },
+  {
+    "tool": "type_text",
+    "input": {
+      "element": 13,
+      "text": "{{password}}",
+      "reason": "enter the teller password to complete the sign-on credentials"
+    }
+  },
+  {
+    "tool": "click",
+    "input": {
+      "element": 14,
+      "reason": "submit the sign-on form to reach the member inquiry screen"
+    }
+  },
+  {
+    "tool": "type_text",
+    "input": {
+      "element": 11,
+      "text": "{{member_id}}",
+      "reason": "enter the member number so the record can be retrieved"
+    }
+  },
+  {
+    "tool": "click",
+    "input": {
+      "element": 14,
+      "reason": "run the member search to open the member detail screen"
+    }
+  },
+  {
+    "tool": "read_value",
+    "input": {
+      "element": 26,
+      "output_name": "savings_balance",
+      "reason": "capture the current balance from the savings row, which is the value the goal asks for"
+    }
+  },
+  {
+    "tool": "done",
+    "input": {
+      "outputs": [{ "name": "savings_balance", "value": "2,340.55" }],
+      "summary": "Signed on as the teller, looked up the member by number, and read the current balance of the savings account.",
+      "reason": "the goal is satisfied: the savings balance has been captured"
+    }
+  }
+]

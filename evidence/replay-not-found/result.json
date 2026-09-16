@@ -1,0 +1,83 @@
+{
+  "run_id": "replay-20260916T052643Z-fcb96b",
+  "capability_ref": {
+    "id": "legacycore.lookup_savings_balance",
+    "version": "1.0.0",
+    "content_hash": "86b91d12a017363dc9bf9c3b15deb3117d567e10fa6d29533550943f82867405"
+  },
+  "status": "BUSINESS_OUTCOME",
+  "outcome": {
+    "code": "MEMBER_NOT_FOUND",
+    "kind": "business",
+    "detected_at_step": "s5",
+    "message": "No member exists with that member number."
+  },
+  "outputs": {},
+  "outputs_complete": false,
+  "steps": [
+    {
+      "step_id": "s1",
+      "index": 0,
+      "intent": "enter the teller user id so the session can be signed on",
+      "status": "ok",
+      "strategy_used": "structural",
+      "strategy_rank": 1,
+      "attempts": 2,
+      "resolve_ms": null,
+      "action_ms": null,
+      "outcomes_matched": [],
+      "note": null
+    },
+    {
+      "step_id": "s2",
+      "index": 1,
+      "intent": "enter the teller password to complete the sign-on credentials",
+      "status": "ok",
+      "strategy_used": "structural",
+      "strategy_rank": 1,
+      "attempts": 2,
+      "resolve_ms": null,
+      "action_ms": null,
+      "outcomes_matched": [],
+      "note": null
+    },
+    {
+      "step_id": "s3",
+      "index": 2,
+      "intent": "submit the sign-on form to reach the member inquiry screen",
+      "status": "ok",
+      "strategy_used": "role",
+      "strategy_rank": 0,
+      "attempts": 1,
+      "resolve_ms": null,
+      "action_ms": null,
+      "outcomes_matched": [],
+      "note": null
+    },
+    {
+      "step_id": "s4",
+      "index": 3,
+      "intent": "enter the member number so the record can be retrieved",
+      "status": "ok",
+      "strategy_used": "structural",
+      "strategy_rank": 1,
+      "attempts": 2,
+      "resolve_ms": null,
+      "action_ms": null,
+      "outcomes_matched": [],
+      "note": null
+    }
+  ],
+  "drift_signals": [
+    "step s1: resolved via strategy rank 1 (structural) rather than the top-ranked strategy",
+    "step s2: resolved via strategy rank 1 (structural) rather than the top-ranked strategy",
+    "step s4: resolved via strategy rank 1 (structural) rather than the top-ranked strategy"
+  ],
+  "human_interventions": [],
+  "approved_by": null,
+  "side_effects_uncertain": false,
+  "failure": null,
+  "started_at": "2026-09-16T05:26:45.171+00:00",
+  "finished_at": "2026-09-16T05:26:45.171+00:00",
+  "evidence_dir": "C:\\Users\\Armaan\\Desktop\\interfaceai\\evidence\\runs\\replay-20260916T052643Z-fcb96b"
+}

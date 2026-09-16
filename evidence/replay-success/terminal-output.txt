@@ -1,0 +1,19 @@
+run_id: replay-20260916T052641Z-5714dc
+capability: legacycore.lookup_savings_balance v1.0.0
+status: SUCCESS
+outputs:
+  savings_balance: 2340.55
+outputs_complete: True
+steps:
+  s1     ok               strategy=structural rank=1
+  s2     ok               strategy=structural rank=1
+  s3     ok               strategy=role rank=0
+  s4     ok               strategy=structural rank=1
+  s5     ok               strategy=role rank=0
+  s6     ok               strategy=structural rank=2
+drift signals:
+  - step s1: resolved via strategy rank 1 (structural) rather than the top-ranked strategy
+  - step s2: resolved via strategy rank 1 (structural) rather than the top-ranked strategy
+  - step s4: resolved via strategy rank 1 (structural) rather than the top-ranked strategy
+  - step s6: resolved via strategy rank 2 (structural) rather than the top-ranked strategy
+evidence dir: C:\Users\Armaan\Desktop\interfaceai\evidence\runs\replay-20260916T052641Z-5714dc

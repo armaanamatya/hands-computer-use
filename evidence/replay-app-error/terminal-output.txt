@@ -1,0 +1,20 @@
+run_id: replay-20260916T052648Z-2aadc6
+capability: legacycore.lookup_savings_balance v1.0.0
+status: FAILED
+outputs_complete: False
+steps:
+  s1     ok               strategy=structural rank=1
+  s2     ok               strategy=structural rank=1
+  s3     ok               strategy=role rank=0
+  s4     ok               strategy=structural rank=1
+drift signals:
+  - step s1: resolved via strategy rank 1 (structural) rather than the top-ranked strategy
+  - step s2: resolved via strategy rank 1 (structural) rather than the top-ranked strategy
+  - step s4: resolved via strategy rank 1 (structural) rather than the top-ranked strategy
+failure category: APP_ERROR
+  step: {'id': 's5', 'index': 4, 'intent': 'run the member search to open the member detail screen', 'kind': 'click'}
+  expected: no application error
+  observed: url='http://127.0.0.1:5050/' title='LegacyCore Teller Workstation' text='LegacyCore Home Member Inquiry Sign Off Quick Search | Internal Server Error The request could not be completed. The host returned an unexpected error. Reference: CBS-0500 Contact the help desk if the'
+  suggested_action: The host returned an internal server error (CBS-0500).
+  evidence: {'screenshot': 'screenshots/step-12-s5-failed.png', 'dom': 'dom/s5-failed.html', 'elements': 'dom/s5-failed-elements.json'}
+evidence dir: C:\Users\Armaan\Desktop\interfaceai\evidence\runs\replay-20260916T052648Z-2aadc6

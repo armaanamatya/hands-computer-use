@@ -1,0 +1,18 @@
+{"seq": 1, "ts": "2026-09-16T05:26:43.563+00:00", "kind": "run_started", "capability_id": "legacycore.lookup_savings_balance", "capability_version": "1.0.0"}
+{"seq": 2, "ts": "2026-09-16T05:26:43.841+00:00", "kind": "policy_check", "note": "fingerprint check", "ok": true, "detail": "text matching 'LegacyCore\\\\ CBS\\\\ 7\\\\.2' is present in frame 2 (expected present)"}
+{"seq": 3, "ts": "2026-09-16T05:26:43.895+00:00", "kind": "policy_check", "step_id": "s1", "note": "target resolved", "strategy": "structural", "strategy_rank": 1, "coordinate_fallback": false}
+{"seq": 4, "ts": "2026-09-16T05:26:43.895+00:00", "kind": "policy_check", "step_id": "s1", "rule": null, "allowed": true, "requires_confirmation": false, "detail": "action allowed"}
+{"seq": 5, "ts": "2026-09-16T05:26:44.063+00:00", "kind": "action", "step_id": "s1", "action_kind": "type", "ok": true, "error": null, "duration_ms": 164}
+{"seq": 6, "ts": "2026-09-16T05:26:44.143+00:00", "kind": "policy_check", "step_id": "s2", "note": "target resolved", "strategy": "structural", "strategy_rank": 1, "coordinate_fallback": false}
+{"seq": 7, "ts": "2026-09-16T05:26:44.144+00:00", "kind": "policy_check", "step_id": "s2", "rule": null, "allowed": true, "requires_confirmation": false, "detail": "action allowed"}
+{"seq": 8, "ts": "2026-09-16T05:26:44.311+00:00", "kind": "action", "step_id": "s2", "action_kind": "type", "ok": true, "error": null, "duration_ms": 167}
+{"seq": 9, "ts": "2026-09-16T05:26:44.392+00:00", "kind": "policy_check", "step_id": "s3", "note": "target resolved", "strategy": "role", "strategy_rank": 0, "coordinate_fallback": false}
+{"seq": 10, "ts": "2026-09-16T05:26:44.393+00:00", "kind": "policy_check", "step_id": "s3", "rule": null, "allowed": true, "requires_confirmation": false, "detail": "action allowed"}
+{"seq": 11, "ts": "2026-09-16T05:26:44.592+00:00", "kind": "action", "step_id": "s3", "action_kind": "click", "ok": true, "error": null, "duration_ms": 198}
+{"seq": 12, "ts": "2026-09-16T05:26:44.677+00:00", "kind": "policy_check", "step_id": "s4", "note": "target resolved", "strategy": "structural", "strategy_rank": 1, "coordinate_fallback": false}
+{"seq": 13, "ts": "2026-09-16T05:26:44.677+00:00", "kind": "policy_check", "step_id": "s4", "rule": null, "allowed": true, "requires_confirmation": false, "detail": "action allowed"}
+{"seq": 14, "ts": "2026-09-16T05:26:44.840+00:00", "kind": "action", "step_id": "s4", "action_kind": "type", "ok": true, "error": null, "duration_ms": 162}
+{"seq": 15, "ts": "2026-09-16T05:26:44.926+00:00", "kind": "policy_check", "step_id": "s5", "note": "target resolved", "strategy": "role", "strategy_rank": 0, "coordinate_fallback": false}
+{"seq": 16, "ts": "2026-09-16T05:26:44.926+00:00", "kind": "policy_check", "step_id": "s5", "rule": null, "allowed": true, "requires_confirmation": false, "detail": "action allowed"}
+{"seq": 17, "ts": "2026-09-16T05:26:45.122+00:00", "kind": "action", "step_id": "s5", "action_kind": "click", "ok": true, "error": null, "duration_ms": 194}
+{"seq": 18, "ts": "2026-09-16T05:26:45.170+00:00", "kind": "outcome_detected", "step_id": "s5", "code": "MEMBER_NOT_FOUND", "outcome_kind": "business", "scope": "global"}

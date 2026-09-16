@@ -1,0 +1,12 @@
+[
+  {
+    "kind": "checkpoint",
+    "trace_step_index": 0,
+    "reason": "checkpoint condition was already true before the action executed; proves nothing"
+  },
+  {
+    "kind": "checkpoint",
+    "trace_step_index": 3,
+    "reason": "checkpoint condition was already true before the action executed; proves nothing"
+  }
+]
