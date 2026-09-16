@@ -1,0 +1,36 @@
+[project]
+name = "hands"
+version = "0.1.0"
+description = "Computer-use automation: an LLM discovers a flow once, the recorded capability replays deterministically, and a human can take over the same live session when it is stuck."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "anthropic>=1.6.0",
+    "openai>=3.14.0",
+    "playwright>=1.63.0",
+    "pydantic>=2.13.0",
+    "flask>=3.1.0",
+    "pyyaml>=6.0",
+    "python-dotenv>=1.0",
+]
+
+[project.scripts]
+hands = "hands.cli:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "pytest-timeout>=2.3",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["hands", "mockbank"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+timeout = 120
+addopts = "-q"
