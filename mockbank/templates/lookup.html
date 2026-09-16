@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Member Inquiry{% endblock %}
+{% block heading %}Member Inquiry{% endblock %}
+{% block body %}
+{% if error %}<table border="0" cellpadding="3"><tr><td class="c3">{{ error }}</td></tr></table>{% endif %}
+<form action="/member" method="get">
+<table border="1" cellpadding="3" cellspacing="0" class="c5">
+<tr><td class="c2">Member No.</td><td><input type="text" name="mno" size="10"></td></tr>
+<tr><td class="c2">Last Name</td><td><input type="text" name="lnm" size="20"></td></tr>
+<tr><td colspan="2" align="right"><input type="submit" value="Search"> <input type="reset" value="Clear"></td></tr>
+</table>
+</form>
+<br>
+<table border="0" cellpadding="2"><tr><td>Enter a member number to display the member record.</td></tr></table>
+{% endblock %}

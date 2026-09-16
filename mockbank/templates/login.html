@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Sign On{% endblock %}
+{% block heading %}Teller Sign On{% endblock %}
+{% block body %}
+{% if notice %}<table border="0" cellpadding="3"><tr><td class="c4">{{ notice }}</td></tr></table>{% endif %}
+{% if error %}<table border="0" cellpadding="3"><tr><td class="c3">{{ error }}</td></tr></table>{% endif %}
+<form action="/main" method="post">
+<table border="1" cellpadding="3" cellspacing="0" class="c5">
+<tr><td class="c2">User ID</td><td><input type="text" name="uid" size="12"></td></tr>
+<tr><td class="c2">Password</td><td><input type="password" name="pwd" size="12"></td></tr>
+<tr><td colspan="2" align="right"><input type="submit" value="Sign On"></td></tr>
+</table>
+</form>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Review Sub-Account Request{% endblock %}
+{% block heading %}Review Sub-Account Request{% endblock %}
+{% block body %}
+{% if error %}<table border="0" cellpadding="3"><tr><td class="c3">{{ error }}</td></tr></table>{% endif %}
+<form action="/subaccount/confirm" method="post">
+<input type="hidden" name="mno" value="{{ mno }}">
+<input type="hidden" name="acct_typ" value="{{ acct_typ }}">
+<input type="hidden" name="nick" value="{{ nick }}">
+<table border="1" cellpadding="3" cellspacing="0" class="c5">
+<tr><td class="c2">Member No.</td><td>{{ mno }}</td></tr>
+<tr><td class="c2">Name</td><td>{{ m.name }}</td></tr>
+<tr><td class="c2">Product</td><td>{{ acct_typ }} - {{ product_name }}</td></tr>
+<tr><td class="c2">Nickname</td><td>{{ nick }}</td></tr>
+{% if needs_override %}
+<tr><td class="c2">Supervisor Override</td><td><input type="password" name="sup" size="6"> <font color="#800000">Supervisor override required for this member.</font></td></tr>
+{% endif %}
+<tr><td colspan="2" align="right"><input type="submit" value="Confirm"></td></tr>
+</table>
+</form>
+<table border="0" cellpadding="2"><tr><td><a href="/member?mno={{ mno }}">Cancel</a></td></tr></table>
+{% endblock %}
