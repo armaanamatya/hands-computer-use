@@ -1,0 +1,85 @@
+{
+  "run_id": "replay-20260916T053139Z-2207ef",
+  "capability_ref": {
+    "id": "legacycore.lookup_savings_balance",
+    "version": "1.0.0",
+    "content_hash": "3cea097d402dc62687bf19cbd910ce7da38549314e4cc4c5e292e81757c2c5cc"
+  },
+  "status": "BUSINESS_OUTCOME",
+  "outcome": {
+    "code": "ACCOUNT_RESTRICTED",
+    "kind": "business",
+    "detected_at_step": "s5",
+    "message": "This member's record is restricted; contact a supervisor."
+  },
+  "outputs": {
+    "restriction_reason": "Member 77777 record is restricted. Contact a supervisor. (SEC-0403)"
+  },
+  "outputs_complete": false,
+  "steps": [
+    {
+      "step_id": "s1",
+      "index": 0,
+      "intent": "enter the teller user id so the session can be signed on",
+      "status": "ok",
+      "strategy_used": "structural",
+      "strategy_rank": 1,
+      "attempts": 2,
+      "resolve_ms": null,
+      "action_ms": null,
+      "outcomes_matched": [],
+      "note": null
+    },
+    {
+      "step_id": "s2",
+      "index": 1,
+      "intent": "enter the teller password to complete the sign-on credentials",
+      "status": "ok",
+      "strategy_used": "structural",
+      "strategy_rank": 1,
+      "attempts": 2,
+      "resolve_ms": null,
+      "action_ms": null,
+      "outcomes_matched": [],
+      "note": null
+    },
+    {
+      "step_id": "s3",
+      "index": 2,
+      "intent": "submit the sign-on form to reach the member inquiry screen",
+      "status": "ok",
+      "strategy_used": "role",
+      "strategy_rank": 0,
+      "attempts": 1,
+      "resolve_ms": null,
+      "action_ms": null,
+      "outcomes_matched": [],
+      "note": null
+    },
+    {
+      "step_id": "s4",
+      "index": 3,
+      "intent": "enter the member number so the record can be retrieved",
+      "status": "ok",
+      "strategy_used": "structural",
+      "strategy_rank": 1,
+      "attempts": 2,
+      "resolve_ms": null,
+      "action_ms": null,
+      "outcomes_matched": [],
+      "note": null
+    }
+  ],
+  "drift_signals": [
+    "step s1: resolved via strategy rank 1 (structural) rather than the top-ranked strategy",
+    "step s2: resolved via strategy rank 1 (structural) rather than the top-ranked strategy",
+    "step s4: resolved via strategy rank 1 (structural) rather than the top-ranked strategy"
+  ],
+  "human_interventions": [],
+  "approved_by": null,
+  "side_effects_uncertain": false,
+  "failure": null,
+  "started_at": "2026-09-16T05:31:40.716+00:00",
+  "finished_at": "2026-09-16T05:31:40.716+00:00",
+  "evidence_dir": "C:\\Users\\Armaan\\Desktop\\interfaceai\\evidence\\runs\\replay-20260916T053139Z-2207ef"
+}

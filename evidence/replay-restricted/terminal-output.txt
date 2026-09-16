@@ -1,0 +1,17 @@
+run_id: replay-20260916T053139Z-2207ef
+capability: legacycore.lookup_savings_balance v1.0.0
+status: BUSINESS_OUTCOME
+outcome: ACCOUNT_RESTRICTED (business) -- This member's record is restricted; contact a supervisor.
+outputs:
+  restriction_reason: Member 77777 record is restricted. Contact a supervisor. (SEC-0403)
+outputs_complete: False
+steps:
+  s1     ok               strategy=structural rank=1
+  s2     ok               strategy=structural rank=1
+  s3     ok               strategy=role rank=0
+  s4     ok               strategy=structural rank=1
+drift signals:
+  - step s1: resolved via strategy rank 1 (structural) rather than the top-ranked strategy
+  - step s2: resolved via strategy rank 1 (structural) rather than the top-ranked strategy
+  - step s4: resolved via strategy rank 1 (structural) rather than the top-ranked strategy
+evidence dir: C:\Users\Armaan\Desktop\interfaceai\evidence\runs\replay-20260916T053139Z-2207ef

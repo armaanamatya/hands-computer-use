@@ -1,0 +1,8 @@
+[
+  {
+    "outcome_code": "SYSTEM_BUSY",
+    "attempt": 1,
+    "action": "click",
+    "result": "clicked recovery target (strategy role, rank 0)"
+  }
+]

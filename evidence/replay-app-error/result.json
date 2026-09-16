@@ -1,0 +1,103 @@
+{
+  "run_id": "replay-20260916T053136Z-931142",
+  "capability_ref": {
+    "id": "legacycore.lookup_savings_balance",
+    "version": "1.0.0",
+    "content_hash": "3cea097d402dc62687bf19cbd910ce7da38549314e4cc4c5e292e81757c2c5cc"
+  },
+  "status": "FAILED",
+  "outcome": null,
+  "outputs": {},
+  "outputs_complete": false,
+  "steps": [
+    {
+      "step_id": "s1",
+      "index": 0,
+      "intent": "enter the teller user id so the session can be signed on",
+      "status": "ok",
+      "strategy_used": "structural",
+      "strategy_rank": 1,
+      "attempts": 2,
+      "resolve_ms": null,
+      "action_ms": null,
+      "outcomes_matched": [],
+      "note": null
+    },
+    {
+      "step_id": "s2",
+      "index": 1,
+      "intent": "enter the teller password to complete the sign-on credentials",
+      "status": "ok",
+      "strategy_used": "structural",
+      "strategy_rank": 1,
+      "attempts": 2,
+      "resolve_ms": null,
+      "action_ms": null,
+      "outcomes_matched": [],
+      "note": null
+    },
+    {
+      "step_id": "s3",
+      "index": 2,
+      "intent": "submit the sign-on form to reach the member inquiry screen",
+      "status": "ok",
+      "strategy_used": "role",
+      "strategy_rank": 0,
+      "attempts": 1,
+      "resolve_ms": null,
+      "action_ms": null,
+      "outcomes_matched": [],
+      "note": null
+    },
+    {
+      "step_id": "s4",
+      "index": 3,
+      "intent": "enter the member number so the record can be retrieved",
+      "status": "ok",
+      "strategy_used": "structural",
+      "strategy_rank": 1,
+      "attempts": 2,
+      "resolve_ms": null,
+      "action_ms": null,
+      "outcomes_matched": [],
+      "note": null
+    }
+  ],
+  "drift_signals": [
+    "step s1: resolved via strategy rank 1 (structural) rather than the top-ranked strategy",
+    "step s2: resolved via strategy rank 1 (structural) rather than the top-ranked strategy",
+    "step s4: resolved via strategy rank 1 (structural) rather than the top-ranked strategy"
+  ],
+  "human_interventions": [],
+  "approved_by": null,
+  "side_effects_uncertain": false,
+  "failure": {
+    "category": "APP_ERROR",
+    "step": {
+      "id": "s5",
+      "index": 4,
+      "intent": "run the member search to open the member detail screen",
+      "kind": "click"
+    },
+    "expected": "no application error",
+    "observed": {
+      "url": "http://127.0.0.1:5050/",
+      "title": "LegacyCore Teller Workstation",
+      "screen_guess": null,
+      "matched_conditions": [],
+      "text_excerpt": "LegacyCore Home Member Inquiry Sign Off Quick Search | Internal Server Error The request could not be completed. The host returned an unexpected error. Reference: CBS-0500 Contact the help desk if the problem persists.",
+      "open_dialog": null
+    },
+    "target_resolution": [],
+    "recovery_history": [],
+    "evidence": {
+      "screenshot": "screenshots/step-12-s5-failed.png",
+      "dom": "dom/s5-failed.html",
+      "elements": "dom/s5-failed-elements.json"
+    },
+    "suggested_action": "The host returned an internal server error (CBS-0500)."
+  },
+  "started_at": "2026-09-16T05:31:38.411+00:00",
+  "finished_at": "2026-09-16T05:31:38.411+00:00",
+  "evidence_dir": "C:\\Users\\Armaan\\Desktop\\interfaceai\\evidence\\runs\\replay-20260916T053136Z-931142"
+}

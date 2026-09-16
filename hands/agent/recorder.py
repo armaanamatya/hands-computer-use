@@ -561,6 +561,43 @@ def _pick_row_key(headers: list[str], cells: list[str], exclude: Optional[int]) 
     return 0, (cells[0] if cells else "")
 
 
+def _describe_element(el: dict[str, Any], screen_id: Optional[str] = None) -> str:
+    """A one-line description of a target that a human reviewer can read.
+
+    The artifact is meant to be reviewable, and "Element for trace step 3"
+    tells a reviewer nothing. This says what the control actually is, the
+    way a person would refer to it on screen.
+    """
+    role = (el.get("role") or "element").strip()
+    name = (el.get("name") or "").strip()
+    rc = el.get("row_ctx") or {}
+    cells = list(rc.get("cells") or [])
+    headers = list(rc.get("headers") or [])
+
+    # For a data cell, name it by its COLUMN, not by the value that happened
+    # to be in it during discovery. The target itself is resolved by matching
+    # the column header and a distinguishing cell in the row, so describing
+    # it by its recorded value would misrepresent the artifact to a reviewer
+    # as being pinned to one record's data.
+    label = ""
+    if role == "cell" and name and headers and rc.get("row_index"):
+        try:
+            col = cells.index(name)
+        except ValueError:
+            col = -1
+        if 0 <= col < len(headers) and headers[col]:
+            label = f"the {headers[col]!r} cell"
+    if not label:
+        label = f"the {name!r} {role}" if name else f"the unnamed {role}"
+
+    non_empty = [c for c in cells if c]
+    if rc and rc.get("row_index") and non_empty and non_empty[0] != name:
+        label += f" in the table row for {non_empty[0]!r}"
+    if screen_id:
+        label += f" on the {screen_id} screen"
+    return label
+
+
 def _build_target(
     el: dict[str, Any],
     policy: Any,
@@ -991,7 +1028,7 @@ def _build_extraction(
             output=output_name,
         )
 
-    target = _build_target(el, policy, f"Extraction target for {step_label}", warnings, step_label)
+    target = _build_target(el, policy, "the value read from " + _describe_element(el), warnings, step_label)
     return Extraction(target=target, from_="text", parse=parse, output=output_name)
 
 
@@ -1283,7 +1320,7 @@ def record(
         el = ts.element
         target: Optional[TargetSpec] = None
         if el is not None:
-            target = _build_target(el, policy, f"Element for {step_label}", warnings, step_label)
+            target = _build_target(el, policy, _describe_element(el, screen_id), warnings, step_label)
 
         value: Optional[str] = None
         is_sensitive = False
