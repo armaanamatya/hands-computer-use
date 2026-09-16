@@ -378,8 +378,25 @@ class DiscoveryLoop:
         self.captured_outputs[output_name] = value
         return value, None
 
+    @staticmethod
+    def _normalize_claimed_outputs(raw: Any) -> dict[str, str]:
+        """`done` declares outputs as a list of {name, value} pairs.
+
+        The list form is used because an open-ended object cannot satisfy
+        strict function calling (see tools.py). A mapping is still accepted
+        so that a transcript recorded before that change, or a hand-written
+        replay script, keeps working.
+        """
+        if isinstance(raw, dict):
+            return {str(k): v for k, v in raw.items()}
+        claimed: dict[str, str] = {}
+        for entry in raw or []:
+            if isinstance(entry, dict) and "name" in entry:
+                claimed[str(entry["name"])] = entry.get("value")
+        return claimed
+
     def _handle_done(self, tool_use_id: str, tool_input: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any]]:
-        outputs_claimed = dict(tool_input.get("outputs") or {})
+        outputs_claimed = self._normalize_claimed_outputs(tool_input.get("outputs"))
         summary = tool_input.get("summary") or ""
         missing = [k for k in outputs_claimed if k not in self.captured_outputs]
         final_outputs = {k: self.captured_outputs.get(k, v) for k, v in outputs_claimed.items()}

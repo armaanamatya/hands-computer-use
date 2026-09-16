@@ -127,7 +127,7 @@ _HAPPY_PATH_SCRIPT: list[dict[str, Any]] = [
     {
         "tool": "done",
         "input": {
-            "outputs": {"savings_balance": "2,340.55"},
+            "outputs": [{"name": "savings_balance", "value": "2,340.55"}],
             "summary": "Signed on, looked up member 12345, and read the savings account's current balance.",
             "reason": "the goal is satisfied: the balance has been captured",
         },
