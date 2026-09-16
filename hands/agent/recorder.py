@@ -191,14 +191,29 @@ def _element_fragments(obs: dict[str, Any], frame_index: int) -> set[str]:
     `frame_texts` (as actually produced by `hands/surface/web.py` +
     `perceive.js`) is a SINGLE whitespace-collapsed blob per frame
     (`norm(root.innerText)`), so there is no way to recover node-level
-    "lines" from it after the fact. `elements[*].name`, however, is exactly
-    that blob BEFORE collapsing across nodes -- each innermost text-bearing
-    element (or interactive control) is emitted with its own already-
-    normalised text. Using those names as the fragment set gives the same
-    content `frame_texts` holds, just still segmented, and
-    `re.escape(fragment)` is guaranteed to be a literal substring of the
-    corresponding `frame_texts` blob (both come from the same `norm()`).
+    "lines" from it after the fact. `elements[*].name` is that same content
+    still segmented: each innermost text-bearing element is emitted with its
+    own already-normalised text.
+
+    But an element's name is NOT always drawn from the document text. An
+    accessible name can come from an attribute instead -- a submit button is
+    named by its `value`, a field by its `placeholder`, `title`, or the text
+    of the label cell beside it. None of those appear in `innerText`, so a
+    landmark built from such a name is a condition `text_present` can never
+    satisfy: the screen check would fail on a screen that is in fact correct.
+
+    That is not hypothetical. An earlier version of this function assumed
+    every name was a substring of the frame text, and the resulting
+    capability picked the submit buttons "Search" and "Clear" as landmarks
+    for the lookup screen. Replay then rejected that screen as UNEXPECTED,
+    which is how the bug was found.
+
+    So candidates are verified against the frame's actual text rather than
+    assumed to be in it.
     """
+    blob = (obs.get("frame_texts") or {}).get(str(frame_index))
+    if blob is None:
+        blob = (obs.get("frame_texts") or {}).get(frame_index) or ""
     frags: set[str] = set()
     for e in obs.get("elements") or []:
         if e.get("frame_index") != frame_index:
@@ -206,9 +221,31 @@ def _element_fragments(obs: dict[str, Any], frame_index: int) -> set[str]:
         if e.get("role") in _NON_LANDMARK_ROLES:
             continue
         name = (e.get("name") or "").strip()
-        if name:
+        # Only keep a fragment the evaluator will actually be able to find.
+        if name and name in blob:
             frags.add(name)
     return frags
+
+
+def _unique_frame_title(
+    observations: list[dict[str, Any]], idxs: list[int], frame_index: int
+) -> Optional[str]:
+    """The work frame's document title, if every observation of this screen
+    agrees on it. A title chosen by the application names the screen and
+    does not vary with the record displayed on it, which makes it a far
+    better screen landmark than any text picked out of the page body."""
+    titles: set[str] = set()
+    for i in idxs:
+        ft = observations[i].get("frame_titles") or {}
+        t = ft.get(str(frame_index))
+        if t is None:
+            t = ft.get(frame_index)
+        t = (t or "").strip()
+        if t:
+            titles.add(t)
+    if len(titles) == 1:
+        return next(iter(titles))
+    return None
 
 
 def _find_same_element(obs: dict[str, Any], element_ref: dict[str, Any]) -> Optional[dict[str, Any]]:
@@ -272,7 +309,10 @@ def _find_work_frame(observations: list[dict[str, Any]]) -> tuple[int, str]:
 
 
 def _build_screens(
-    observations: list[dict[str, Any]], work_index: int, work_name: str
+    observations: list[dict[str, Any]],
+    work_index: int,
+    work_name: str,
+    volatile_values: Optional[set[str]] = None,
 ) -> tuple[dict[str, Screen], list[Optional[str]], dict[str, str], list[str]]:
     """Group observations into screens by the work frame's URL path, and
     derive each screen's landmarks by set difference: text present in
@@ -316,6 +356,7 @@ def _build_screens(
         obs_indices_by_path.setdefault(p, []).append(i)
 
     frag_by_obs = [_element_fragments(obs, work_index) for obs in observations]
+    volatile_values = volatile_values or set()
 
     screens: dict[str, Screen] = {}
     for path, sid in path_to_id.items():
@@ -330,9 +371,47 @@ def _build_screens(
         pattern = _path_pattern(path)
         frame_matcher = FrameMatcher(url_pattern=pattern)
 
+        # A landmark has to identify the SCREEN, not the record that happened
+        # to be on it during discovery. Text chosen purely by set difference
+        # over a single run does the opposite: on a member detail screen the
+        # most "distinctive" strings are the member's own name, number and
+        # balances, so the capability would only ever recognise the screen
+        # for the one member it was recorded against. That is the difference
+        # between a recording and a capability, and it showed up as
+        # UNEXPECTED_SCREEN the first time a recorded artifact was replayed
+        # with a different member.
+        #
+        # The work frame's document title is preferred instead: it is chosen
+        # by the application to name the screen, and it does not vary with
+        # the record being viewed. Distinctive text is kept as a fallback,
+        # with anything that matches a run input or a captured output
+        # removed, since those are known to be per-record values.
+        own_title = _unique_frame_title(observations, own_idxs, work_index)
+        other_titles = {
+            _unique_frame_title(observations, obs_indices_by_path[p2], work_index)
+            for p2 in path_to_id
+            if p2 != path
+        }
+        safe_text = [t for t in distinctive if t not in volatile_values]
+
         landmarks: list[Condition]
-        if distinctive:
-            landmarks = [TextPresent(pattern=re.escape(t), frame=frame_matcher) for t in distinctive[:2]]
+        if own_title and own_title not in other_titles:
+            # The title alone, deliberately. Adding a page-text landmark on
+            # top can only make the check more brittle, never more correct:
+            # a single discovery run cannot tell text that identifies the
+            # SCREEN from text that merely describes the RECORD that was on
+            # it. Doing exactly that picked "LN" (the loan row of the member
+            # used during discovery) as a member-screen landmark, so the
+            # capability then rejected the member screen for every member
+            # without a loan. A title is structural by construction: the
+            # application chose it to name the screen.
+            landmarks = [TitleMatches(pattern=re.escape(own_title), frame=frame_matcher)]
+        elif safe_text:
+            landmarks = [TextPresent(pattern=re.escape(t), frame=frame_matcher) for t in safe_text[:2]]
+            warnings.append(
+                f"screen {sid!r} has no distinctive work-frame title; using page text as a "
+                "landmark, which is more likely to drift than a title"
+            )
         else:
             titles = {observations[i].get("title", "") for i in own_idxs}
             title_text = next(iter(titles)) if len(titles) == 1 and next(iter(titles)) else path
@@ -1135,7 +1214,19 @@ def record(
     inputs = dict(inputs or {})
 
     work_index, work_name = _find_work_frame(observations)
-    screens, obs_paths, path_to_id, screen_warnings = _build_screens(observations, work_index, work_name)
+    # Values known to vary per record (the run's own inputs and anything the
+    # run captured as an output) must not become screen landmarks: they
+    # identify the record, not the screen.
+    volatile_values: set[str] = set()
+    for _v in (inputs or {}).values():
+        if _v:
+            volatile_values.add(str(_v).strip())
+    for _v in (trace.outputs or {}).values():
+        if _v:
+            volatile_values.add(str(_v).strip())
+    screens, obs_paths, path_to_id, screen_warnings = _build_screens(
+        observations, work_index, work_name, volatile_values
+    )
     warnings.extend(screen_warnings)
 
     raw_steps: list[Step] = []
@@ -1310,11 +1401,26 @@ def record(
     target_app = TargetApp(app=app, entry_url=entry_url, fingerprint=fingerprint)
 
     # ---------------------------------------------------------- capability policy
-    domain = urlsplit(entry_url).netloc.lower()
-    used_actions = sorted({s.kind for s in curated_steps})
+    #
+    # Two details here are load-bearing, and both were found by replaying a
+    # recorded artifact rather than by reading the code:
+    #
+    # 1. The domain must be the HOSTNAME, not netloc. Policy.check_url
+    #    compares against urlsplit().hostname, which is port-free, so a
+    #    "127.0.0.1:5050" entry can never match anything. Because the
+    #    effective policy is the INTERSECTION of the operator policy and
+    #    this one, a host:port entry silently empties the domain set and
+    #    blocks every action in the run.
+    # 2. `navigate` must always be permitted, even when no navigate STEP was
+    #    recorded. Replay always navigates to the entry URL before the first
+    #    step, so deriving the action list purely from recorded step kinds
+    #    locks the capability out of its own starting page.
+    domain = urlsplit(entry_url).hostname or ""
+    used_actions = {s.kind for s in curated_steps}
+    used_actions.add("navigate")
     cap_policy = CapabilityPolicy(
         allowed_domains=[domain] if domain else [],
-        allowed_actions=used_actions,
+        allowed_actions=sorted(used_actions),
         allow_coordinate_fallback=bool(getattr(policy, "allow_coordinate_fallback", False)),
     )
 
