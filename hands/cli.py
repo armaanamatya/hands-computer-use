@@ -161,6 +161,45 @@ def _load_fake_script(path: str) -> list[dict[str, Any]]:
     return fake.script
 
 
+def _load_outcome_library(path: Optional[str]) -> Optional[list[dict[str, Any]]]:
+    """Load the curated per-app outcome library that gets merged into a
+    recorded capability.
+
+    This matters more than it looks. A discovery run only ever walks the
+    happy path, so it cannot observe "record not found", "system busy", or a
+    500 page -- those conditions simply never appear. Without a library
+    merged in, the recorded artifact has no detectors for them, and replay
+    then reports a legitimate business answer as UNEXPECTED_SCREEN: it can
+    tell it is not where it expected to be, but not why, and a caller cannot
+    distinguish "no such member" from a broken automation.
+
+    So the library is the per-app knowledge a human curates once and every
+    capability recorded against that app inherits. Each entry is marked
+    `origin: "library"` in the artifact, and the recorder lints every
+    detector against the recorded success path so a loose pattern cannot
+    shadow a successful run.
+    """
+    if path is not None and path.strip().lower() == "none":
+        return None
+    if path is None:
+        default = config.CAPABILITIES_DIR / "library" / "legacycore.outcomes.json"
+        if not default.exists():
+            return None
+        path = str(default)
+    p = Path(path)
+    try:
+        text = p.read_text(encoding="utf-8")
+    except OSError as e:
+        raise SystemExit(f"hands: could not read outcome library {str(p)!r}: {e.strerror or e}")
+    try:
+        data = json.loads(text)
+    except json.JSONDecodeError as e:
+        raise SystemExit(f"hands: outcome library {str(p)!r} is not valid JSON: {e}")
+    if not isinstance(data, list):
+        raise SystemExit(f"hands: outcome library {str(p)!r} must contain a JSON list of outcomes")
+    return data
+
+
 def _sniff_output_type(value: str) -> str:
     v = (value or "").strip()
     if _MONEY_RE.fullmatch(v):
@@ -302,6 +341,7 @@ def _cmd_discover(args: argparse.Namespace) -> int:
             for oname, oval in (trace.outputs or {}).items()
         }
         app = AppInfo(vendor="discovered", product=name, version="0.0.1")
+        outcome_library = _load_outcome_library(getattr(args, "outcome_library", None))
         try:
             result = record(
                 trace,
@@ -312,6 +352,7 @@ def _cmd_discover(args: argparse.Namespace) -> int:
                 outputs_spec=outputs_spec,
                 policy=policy,
                 redactor=redactor,
+                outcome_library=outcome_library,
                 entry_url=entry_url,
                 app=app,
                 discovery_run_id=run_id,
@@ -869,6 +910,18 @@ def build_parser() -> argparse.ArgumentParser:
     d.add_argument("--name", default=None, help="Human-readable capability name (default: derived from --goal).")
     d.add_argument("--policy", default=None, help=f"Path to policy.yaml (default: {config.DEFAULT_POLICY}).")
     d.add_argument("--no-record", action="store_true", help="Run discovery without recording a capability artifact.")
+    d.add_argument(
+        "--outcome-library",
+        default=None,
+        metavar="PATH",
+        help=(
+            "Curated per-app outcome definitions to merge into the recorded capability "
+            "(default: capabilities/library/legacycore.outcomes.json if present). A discovery "
+            "run only walks the happy path, so it cannot observe conditions like 'record not "
+            "found' or 'system busy'; without these, replay can only report that it is on an "
+            "unexpected screen, not which business outcome occurred. Pass 'none' to skip."
+        ),
+    )
     d.set_defaults(func=_cmd_discover)
 
     r = sub.add_parser(
