@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Open Sub-Account{% endblock %}
+{% block heading %}Open Sub-Account{% endblock %}
+{% block body %}
+<table border="0" cellpadding="2"><tr><td>Member {{ mno }} &mdash; {{ m.name }}</td></tr></table>
+{% if error %}<table border="0" cellpadding="3"><tr><td class="c3">{{ error }}</td></tr></table>{% endif %}
+<form action="/subaccount/review" method="post"{% if confirm_dialog %} onsubmit="return confirm('Open a new sub-account for member {{ mno }}?')"{% endif %}>
+<input type="hidden" name="mno" value="{{ mno }}">
+<table border="1" cellpadding="3" cellspacing="0" class="c5">
+<tr><td class="c2">Product</td><td><select name="acct_typ">
+{% for code, label in products %}<option value="{{ code }}"{% if acct_typ == code %} selected{% endif %}>{{ code }} - {{ label }}</option>{% endfor %}
+</select></td></tr>
+<tr><td class="c2">Nickname</td><td><input type="text" name="nick" size="20"></td></tr>
+<tr><td colspan="2" align="right"><input type="submit" value="Continue"></td></tr>
+</table>
+</form>
+<table border="0" cellpadding="2"><tr><td><a href="/member?mno={{ mno }}">Cancel</a></td></tr></table>
+{% endblock %}

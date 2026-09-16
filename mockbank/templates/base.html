@@ -1,0 +1,21 @@
+<html>
+<head>
+<title>{% block title %}LegacyCore{% endblock %}</title>
+<style>
+body { background: #c0c0c0; margin: 6px; }
+.c1 { background: #000080; color: #ffffff; font-weight: bold; }
+.c2 { background: #e8e8e8; }
+.c3 { color: #800000; font-weight: bold; }
+.c4 { background: #ffffe0; }
+.c5 { background: #ffffff; }
+</style>
+</head>
+<body>
+<font face="Arial" size="2">
+<table width="100%" border="0" cellpadding="3" cellspacing="0">
+<tr><td class="c1">{% block heading %}{% endblock %}</td><td class="c1" align="right">LegacyCore CBS 7.2</td></tr>
+</table>
+{% block body %}{% endblock %}
+</font>
+</body>
+</html>
