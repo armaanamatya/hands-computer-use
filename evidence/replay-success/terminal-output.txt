@@ -1,4 +1,4 @@
-run_id: replay-20260916T052641Z-5714dc
+run_id: replay-20260916T053129Z-706d1c
 capability: legacycore.lookup_savings_balance v1.0.0
 status: SUCCESS
 outputs:
@@ -16,4 +16,4 @@ drift signals:
   - step s2: resolved via strategy rank 1 (structural) rather than the top-ranked strategy
   - step s4: resolved via strategy rank 1 (structural) rather than the top-ranked strategy
   - step s6: resolved via strategy rank 2 (structural) rather than the top-ranked strategy
-evidence dir: C:\Users\Armaan\Desktop\interfaceai\evidence\runs\replay-20260916T052641Z-5714dc
+evidence dir: C:\Users\Armaan\Desktop\interfaceai\evidence\runs\replay-20260916T053129Z-706d1c

@@ -1,23 +1,23 @@
-{"seq": 1, "ts": "2026-09-16T05:26:45.889+00:00", "kind": "run_started", "capability_id": "legacycore.lookup_savings_balance", "capability_version": "1.0.0"}
-{"seq": 2, "ts": "2026-09-16T05:26:46.155+00:00", "kind": "policy_check", "note": "fingerprint check", "ok": true, "detail": "text matching 'LegacyCore\\\\ CBS\\\\ 7\\\\.2' is present in frame 2 (expected present)"}
-{"seq": 3, "ts": "2026-09-16T05:26:46.212+00:00", "kind": "policy_check", "step_id": "s1", "note": "target resolved", "strategy": "structural", "strategy_rank": 1, "coordinate_fallback": false}
-{"seq": 4, "ts": "2026-09-16T05:26:46.212+00:00", "kind": "policy_check", "step_id": "s1", "rule": null, "allowed": true, "requires_confirmation": false, "detail": "action allowed"}
-{"seq": 5, "ts": "2026-09-16T05:26:46.383+00:00", "kind": "action", "step_id": "s1", "action_kind": "type", "ok": true, "error": null, "duration_ms": 169}
-{"seq": 6, "ts": "2026-09-16T05:26:46.460+00:00", "kind": "policy_check", "step_id": "s2", "note": "target resolved", "strategy": "structural", "strategy_rank": 1, "coordinate_fallback": false}
-{"seq": 7, "ts": "2026-09-16T05:26:46.461+00:00", "kind": "policy_check", "step_id": "s2", "rule": null, "allowed": true, "requires_confirmation": false, "detail": "action allowed"}
-{"seq": 8, "ts": "2026-09-16T05:26:46.618+00:00", "kind": "action", "step_id": "s2", "action_kind": "type", "ok": true, "error": null, "duration_ms": 157}
-{"seq": 9, "ts": "2026-09-16T05:26:46.709+00:00", "kind": "policy_check", "step_id": "s3", "note": "target resolved", "strategy": "role", "strategy_rank": 0, "coordinate_fallback": false}
-{"seq": 10, "ts": "2026-09-16T05:26:46.710+00:00", "kind": "policy_check", "step_id": "s3", "rule": null, "allowed": true, "requires_confirmation": false, "detail": "action allowed"}
-{"seq": 11, "ts": "2026-09-16T05:26:46.898+00:00", "kind": "action", "step_id": "s3", "action_kind": "click", "ok": true, "error": null, "duration_ms": 187}
-{"seq": 12, "ts": "2026-09-16T05:26:46.977+00:00", "kind": "policy_check", "step_id": "s4", "note": "target resolved", "strategy": "structural", "strategy_rank": 1, "coordinate_fallback": false}
-{"seq": 13, "ts": "2026-09-16T05:26:46.977+00:00", "kind": "policy_check", "step_id": "s4", "rule": null, "allowed": true, "requires_confirmation": false, "detail": "action allowed"}
-{"seq": 14, "ts": "2026-09-16T05:26:47.148+00:00", "kind": "action", "step_id": "s4", "action_kind": "type", "ok": true, "error": null, "duration_ms": 170}
-{"seq": 15, "ts": "2026-09-16T05:26:47.224+00:00", "kind": "policy_check", "step_id": "s5", "note": "target resolved", "strategy": "role", "strategy_rank": 0, "coordinate_fallback": false}
-{"seq": 16, "ts": "2026-09-16T05:26:47.225+00:00", "kind": "policy_check", "step_id": "s5", "rule": null, "allowed": true, "requires_confirmation": false, "detail": "action allowed"}
-{"seq": 17, "ts": "2026-09-16T05:26:47.413+00:00", "kind": "action", "step_id": "s5", "action_kind": "click", "ok": true, "error": null, "duration_ms": 187}
-{"seq": 18, "ts": "2026-09-16T05:26:47.452+00:00", "kind": "outcome_detected", "step_id": "s5", "code": "SYSTEM_BUSY", "outcome_kind": "interstitial", "scope": "global"}
-{"seq": 19, "ts": "2026-09-16T05:26:47.649+00:00", "kind": "recovery", "step_id": "s5", "outcome_code": "SYSTEM_BUSY", "attempt": 1, "action": "click", "result": "clicked recovery target (strategy role, rank 0)"}
-{"seq": 20, "ts": "2026-09-16T05:26:47.746+00:00", "kind": "policy_check", "step_id": "s6", "note": "target resolved", "strategy": "structural", "strategy_rank": 2, "coordinate_fallback": false}
-{"seq": 21, "ts": "2026-09-16T05:26:47.746+00:00", "kind": "policy_check", "step_id": "s6", "rule": null, "allowed": true, "requires_confirmation": false, "detail": "action allowed"}
-{"seq": 22, "ts": "2026-09-16T05:26:47.747+00:00", "kind": "action", "step_id": "s6", "action_kind": "extract", "ok": true, "note": "no-op action phase"}
-{"seq": 23, "ts": "2026-09-16T05:26:47.839+00:00", "kind": "checkpoint", "step_id": "s6", "note": "extraction ok", "output": "savings_balance"}
+{"seq": 1, "ts": "2026-09-16T05:31:34.067+00:00", "kind": "run_started", "capability_id": "legacycore.lookup_savings_balance", "capability_version": "1.0.0"}
+{"seq": 2, "ts": "2026-09-16T05:31:34.343+00:00", "kind": "policy_check", "note": "fingerprint check", "ok": true, "detail": "text matching 'LegacyCore\\\\ CBS\\\\ 7\\\\.2' is present in frame 2 (expected present)"}
+{"seq": 3, "ts": "2026-09-16T05:31:34.401+00:00", "kind": "policy_check", "step_id": "s1", "note": "target resolved", "strategy": "structural", "strategy_rank": 1, "coordinate_fallback": false}
+{"seq": 4, "ts": "2026-09-16T05:31:34.402+00:00", "kind": "policy_check", "step_id": "s1", "rule": null, "allowed": true, "requires_confirmation": false, "detail": "action allowed"}
+{"seq": 5, "ts": "2026-09-16T05:31:34.568+00:00", "kind": "action", "step_id": "s1", "action_kind": "type", "ok": true, "error": null, "duration_ms": 165}
+{"seq": 6, "ts": "2026-09-16T05:31:34.650+00:00", "kind": "policy_check", "step_id": "s2", "note": "target resolved", "strategy": "structural", "strategy_rank": 1, "coordinate_fallback": false}
+{"seq": 7, "ts": "2026-09-16T05:31:34.650+00:00", "kind": "policy_check", "step_id": "s2", "rule": null, "allowed": true, "requires_confirmation": false, "detail": "action allowed"}
+{"seq": 8, "ts": "2026-09-16T05:31:34.817+00:00", "kind": "action", "step_id": "s2", "action_kind": "type", "ok": true, "error": null, "duration_ms": 166}
+{"seq": 9, "ts": "2026-09-16T05:31:34.897+00:00", "kind": "policy_check", "step_id": "s3", "note": "target resolved", "strategy": "role", "strategy_rank": 0, "coordinate_fallback": false}
+{"seq": 10, "ts": "2026-09-16T05:31:34.898+00:00", "kind": "policy_check", "step_id": "s3", "rule": null, "allowed": true, "requires_confirmation": false, "detail": "action allowed"}
+{"seq": 11, "ts": "2026-09-16T05:31:35.097+00:00", "kind": "action", "step_id": "s3", "action_kind": "click", "ok": true, "error": null, "duration_ms": 198}
+{"seq": 12, "ts": "2026-09-16T05:31:35.181+00:00", "kind": "policy_check", "step_id": "s4", "note": "target resolved", "strategy": "structural", "strategy_rank": 1, "coordinate_fallback": false}
+{"seq": 13, "ts": "2026-09-16T05:31:35.181+00:00", "kind": "policy_check", "step_id": "s4", "rule": null, "allowed": true, "requires_confirmation": false, "detail": "action allowed"}
+{"seq": 14, "ts": "2026-09-16T05:31:35.345+00:00", "kind": "action", "step_id": "s4", "action_kind": "type", "ok": true, "error": null, "duration_ms": 163}
+{"seq": 15, "ts": "2026-09-16T05:31:35.431+00:00", "kind": "policy_check", "step_id": "s5", "note": "target resolved", "strategy": "role", "strategy_rank": 0, "coordinate_fallback": false}
+{"seq": 16, "ts": "2026-09-16T05:31:35.431+00:00", "kind": "policy_check", "step_id": "s5", "rule": null, "allowed": true, "requires_confirmation": false, "detail": "action allowed"}
+{"seq": 17, "ts": "2026-09-16T05:31:35.627+00:00", "kind": "action", "step_id": "s5", "action_kind": "click", "ok": true, "error": null, "duration_ms": 195}
+{"seq": 18, "ts": "2026-09-16T05:31:35.675+00:00", "kind": "outcome_detected", "step_id": "s5", "code": "SYSTEM_BUSY", "outcome_kind": "interstitial", "scope": "global"}
+{"seq": 19, "ts": "2026-09-16T05:31:35.875+00:00", "kind": "recovery", "step_id": "s5", "outcome_code": "SYSTEM_BUSY", "attempt": 1, "action": "click", "result": "clicked recovery target (strategy role, rank 0)"}
+{"seq": 20, "ts": "2026-09-16T05:31:35.967+00:00", "kind": "policy_check", "step_id": "s6", "note": "target resolved", "strategy": "structural", "strategy_rank": 2, "coordinate_fallback": false}
+{"seq": 21, "ts": "2026-09-16T05:31:35.967+00:00", "kind": "policy_check", "step_id": "s6", "rule": null, "allowed": true, "requires_confirmation": false, "detail": "action allowed"}
+{"seq": 22, "ts": "2026-09-16T05:31:35.968+00:00", "kind": "action", "step_id": "s6", "action_kind": "extract", "ok": true, "note": "no-op action phase"}
+{"seq": 23, "ts": "2026-09-16T05:31:36.061+00:00", "kind": "checkpoint", "step_id": "s6", "note": "extraction ok", "output": "savings_balance"}

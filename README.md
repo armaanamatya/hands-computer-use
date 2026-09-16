@@ -71,12 +71,14 @@ uv run hands discover \
   --input username=teller1 \
   --input password=@env:MOCKBANK_PASSWORD \
   --input member_id=12345 \
-  --out capabilities/lookup_savings_balance.json
+  --out capabilities/lookup_savings_balance.recorded.json
 ```
 
 `@env:` reads a value from the environment so a secret never appears on the command line or in shell history. The password is treated as sensitive automatically: the model is shown a placeholder and a description, never the value.
 
-To run the same path with **no API key**, add `--fake-llm evidence/discovery/script.json` to substitute a scripted provider.
+To run the same path with **no API key**, add `--fake-llm evidence/discovery/script.json` to substitute a scripted provider. That exercises the identical loop, tools, policy gate and recorder; it is not a real discovery run, and `evidence/discovery/PENDING.md` says so plainly.
+
+Two capabilities are in the repo: `lookup_savings_balance.json` is hand-authored, and `lookup_savings_balance.recorded.json` is what the recorder produced from the run above. They replay identically. Either path works in the commands below.
 
 ### 2. Replay: no model in the loop
 

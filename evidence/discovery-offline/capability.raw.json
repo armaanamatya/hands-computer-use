@@ -4,7 +4,7 @@
   "name": "Look up member savings balance",
   "version": "1.0.0",
   "description": "Sign on, look up the member, and read their savings account current balance. (raw/unpruned: includes failed and policy-blocked steps, and every checkpoint/outcome before linting)",
-  "content_hash": "e8d4bd73266dbc3ff498b3416f848401de69e4d8c91e03d4d7300ce67d94290c",
+  "content_hash": "83fa4496c24ec1523c59bf4ff03bdf52385eab80628d36c73ffd7a248894247c",
   "approval": {
     "status": "draft",
     "approved_by": null,
@@ -159,7 +159,7 @@
       "intent": "enter the teller user id so the session can be signed on",
       "origin": "agent",
       "target": {
-        "description": "Element for trace step 0 (type_text)",
+        "description": "the 'User ID' textbox on the main screen",
         "frame": {
           "url_pattern": "^https?://[^/]+/main(?:$|\\?)",
           "name": null,
@@ -222,7 +222,7 @@
         "condition": {
           "type": "value_equals",
           "target": {
-            "description": "Element for trace step 0 (type_text)",
+            "description": "the 'User ID' textbox on the main screen",
             "frame": {
               "url_pattern": "^https?://[^/]+/main(?:$|\\?)",
               "name": null,
@@ -296,7 +296,7 @@
       "intent": "enter the teller password to complete the sign-on credentials",
       "origin": "agent",
       "target": {
-        "description": "Element for trace step 1 (type_text)",
+        "description": "the 'Password' textbox on the main screen",
         "frame": {
           "url_pattern": "^https?://[^/]+/main(?:$|\\?)",
           "name": null,
@@ -372,7 +372,7 @@
       "intent": "submit the sign-on form to reach the member inquiry screen",
       "origin": "agent",
       "target": {
-        "description": "Element for trace step 2 (click)",
+        "description": "the 'Sign On' button on the main screen",
         "frame": {
           "url_pattern": "^https?://[^/]+/main(?:$|\\?)",
           "name": null,
@@ -482,7 +482,7 @@
       "intent": "enter the member number so the record can be retrieved",
       "origin": "agent",
       "target": {
-        "description": "Element for trace step 3 (type_text)",
+        "description": "the 'Member No.' textbox on the lookup screen",
         "frame": {
           "url_pattern": "^https?://[^/]+/lookup(?:$|\\?)",
           "name": null,
@@ -545,7 +545,7 @@
         "condition": {
           "type": "value_equals",
           "target": {
-            "description": "Element for trace step 3 (type_text)",
+            "description": "the 'Member No.' textbox on the lookup screen",
             "frame": {
               "url_pattern": "^https?://[^/]+/lookup(?:$|\\?)",
               "name": null,
@@ -619,7 +619,7 @@
       "intent": "run the member search to open the member detail screen",
       "origin": "agent",
       "target": {
-        "description": "Element for trace step 4 (click)",
+        "description": "the 'Search' button on the lookup screen",
         "frame": {
           "url_pattern": "^https?://[^/]+/lookup(?:$|\\?)",
           "name": null,
@@ -729,7 +729,7 @@
       "intent": "capture the current balance from the savings row, which is the value the goal asks for",
       "origin": "agent",
       "target": {
-        "description": "Element for trace step 5 (read_value)",
+        "description": "the 'Curr Bal' cell in the table row for '0012345-S1' on the member screen",
         "frame": {
           "url_pattern": "^https?://[^/]+/member(?:$|\\?)",
           "name": null,
@@ -1135,10 +1135,10 @@
   },
   "provenance": {
     "source_goal": "Sign on, look up the member, and read their savings account current balance.",
-    "discovery_run_id": "disc-20260916T052638Z-1c0ff8",
+    "discovery_run_id": "disc-20260916T053126Z-a6705d",
     "model": "fake-llm",
     "prompt_version": "1",
-    "recorded_at": "2026-09-16T05:26:40.417+00:00",
+    "recorded_at": "2026-09-16T05:31:28.522+00:00",
     "recorded_against": {
       "viewport": {
         "width": 1280,
@@ -1146,7 +1146,7 @@
       },
       "browser": "chromium"
     },
-    "evidence_ref": "C:\\Users\\Armaan\\Desktop\\interfaceai\\evidence\\runs\\disc-20260916T052638Z-1c0ff8",
+    "evidence_ref": "C:\\Users\\Armaan\\Desktop\\interfaceai\\evidence\\runs\\disc-20260916T053126Z-a6705d",
     "raw_artifact_ref": null
   }
 }

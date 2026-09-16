@@ -1,4 +1,4 @@
-run_id: replay-20260916T052648Z-2aadc6
+run_id: replay-20260916T053136Z-931142
 capability: legacycore.lookup_savings_balance v1.0.0
 status: FAILED
 outputs_complete: False
@@ -17,4 +17,4 @@ failure category: APP_ERROR
   observed: url='http://127.0.0.1:5050/' title='LegacyCore Teller Workstation' text='LegacyCore Home Member Inquiry Sign Off Quick Search | Internal Server Error The request could not be completed. The host returned an unexpected error. Reference: CBS-0500 Contact the help desk if the'
   suggested_action: The host returned an internal server error (CBS-0500).
   evidence: {'screenshot': 'screenshots/step-12-s5-failed.png', 'dom': 'dom/s5-failed.html', 'elements': 'dom/s5-failed-elements.json'}
-evidence dir: C:\Users\Armaan\Desktop\interfaceai\evidence\runs\replay-20260916T052648Z-2aadc6
+evidence dir: C:\Users\Armaan\Desktop\interfaceai\evidence\runs\replay-20260916T053136Z-931142

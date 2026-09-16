@@ -1,9 +1,9 @@
 {
-  "run_id": "replay-20260916T052643Z-fcb96b",
+  "run_id": "replay-20260916T053131Z-ed6de1",
   "capability_ref": {
     "id": "legacycore.lookup_savings_balance",
     "version": "1.0.0",
-    "content_hash": "86b91d12a017363dc9bf9c3b15deb3117d567e10fa6d29533550943f82867405"
+    "content_hash": "3cea097d402dc62687bf19cbd910ce7da38549314e4cc4c5e292e81757c2c5cc"
   },
   "status": "BUSINESS_OUTCOME",
   "outcome": {
@@ -77,7 +77,7 @@
   "approved_by": null,
   "side_effects_uncertain": false,
   "failure": null,
-  "started_at": "2026-09-16T05:26:45.171+00:00",
-  "finished_at": "2026-09-16T05:26:45.171+00:00",
-  "evidence_dir": "C:\\Users\\Armaan\\Desktop\\interfaceai\\evidence\\runs\\replay-20260916T052643Z-fcb96b"
+  "started_at": "2026-09-16T05:31:33.359+00:00",
+  "finished_at": "2026-09-16T05:31:33.359+00:00",
+  "evidence_dir": "C:\\Users\\Armaan\\Desktop\\interfaceai\\evidence\\runs\\replay-20260916T053131Z-ed6de1"
 }

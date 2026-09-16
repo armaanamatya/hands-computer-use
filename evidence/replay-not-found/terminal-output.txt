@@ -1,4 +1,4 @@
-run_id: replay-20260916T052643Z-fcb96b
+run_id: replay-20260916T053131Z-ed6de1
 capability: legacycore.lookup_savings_balance v1.0.0
 status: BUSINESS_OUTCOME
 outcome: MEMBER_NOT_FOUND (business) -- No member exists with that member number.
@@ -12,4 +12,4 @@ drift signals:
   - step s1: resolved via strategy rank 1 (structural) rather than the top-ranked strategy
   - step s2: resolved via strategy rank 1 (structural) rather than the top-ranked strategy
   - step s4: resolved via strategy rank 1 (structural) rather than the top-ranked strategy
-evidence dir: C:\Users\Armaan\Desktop\interfaceai\evidence\runs\replay-20260916T052643Z-fcb96b
+evidence dir: C:\Users\Armaan\Desktop\interfaceai\evidence\runs\replay-20260916T053131Z-ed6de1
