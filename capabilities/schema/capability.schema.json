@@ -1,0 +1,2086 @@
+{
+  "$defs": {
+    "AllOf": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "all_of",
+          "default": "all_of",
+          "title": "Type",
+          "type": "string"
+        },
+        "conditions": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "all_of": "#/$defs/AllOf",
+                "any_of": "#/$defs/AnyOf",
+                "dialog_open": "#/$defs/DialogOpen",
+                "element_absent": "#/$defs/ElementAbsent",
+                "element_visible": "#/$defs/ElementVisible",
+                "not_": "#/$defs/Not",
+                "output_matches": "#/$defs/OutputMatches",
+                "text_present": "#/$defs/TextPresent",
+                "title_matches": "#/$defs/TitleMatches",
+                "url_matches": "#/$defs/UrlMatches",
+                "value_equals": "#/$defs/ValueEquals"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/UrlMatches"
+              },
+              {
+                "$ref": "#/$defs/TitleMatches"
+              },
+              {
+                "$ref": "#/$defs/TextPresent"
+              },
+              {
+                "$ref": "#/$defs/ElementVisible"
+              },
+              {
+                "$ref": "#/$defs/ElementAbsent"
+              },
+              {
+                "$ref": "#/$defs/ValueEquals"
+              },
+              {
+                "$ref": "#/$defs/OutputMatches"
+              },
+              {
+                "$ref": "#/$defs/DialogOpen"
+              },
+              {
+                "$ref": "#/$defs/AllOf"
+              },
+              {
+                "$ref": "#/$defs/AnyOf"
+              },
+              {
+                "$ref": "#/$defs/Not"
+              }
+            ]
+          },
+          "title": "Conditions",
+          "type": "array"
+        },
+        "frame": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FrameMatcher"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "conditions"
+      ],
+      "title": "AllOf",
+      "type": "object"
+    },
+    "AnyOf": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "any_of",
+          "default": "any_of",
+          "title": "Type",
+          "type": "string"
+        },
+        "conditions": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "all_of": "#/$defs/AllOf",
+                "any_of": "#/$defs/AnyOf",
+                "dialog_open": "#/$defs/DialogOpen",
+                "element_absent": "#/$defs/ElementAbsent",
+                "element_visible": "#/$defs/ElementVisible",
+                "not_": "#/$defs/Not",
+                "output_matches": "#/$defs/OutputMatches",
+                "text_present": "#/$defs/TextPresent",
+                "title_matches": "#/$defs/TitleMatches",
+                "url_matches": "#/$defs/UrlMatches",
+                "value_equals": "#/$defs/ValueEquals"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/UrlMatches"
+              },
+              {
+                "$ref": "#/$defs/TitleMatches"
+              },
+              {
+                "$ref": "#/$defs/TextPresent"
+              },
+              {
+                "$ref": "#/$defs/ElementVisible"
+              },
+              {
+                "$ref": "#/$defs/ElementAbsent"
+              },
+              {
+                "$ref": "#/$defs/ValueEquals"
+              },
+              {
+                "$ref": "#/$defs/OutputMatches"
+              },
+              {
+                "$ref": "#/$defs/DialogOpen"
+              },
+              {
+                "$ref": "#/$defs/AllOf"
+              },
+              {
+                "$ref": "#/$defs/AnyOf"
+              },
+              {
+                "$ref": "#/$defs/Not"
+              }
+            ]
+          },
+          "title": "Conditions",
+          "type": "array"
+        },
+        "frame": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FrameMatcher"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "conditions"
+      ],
+      "title": "AnyOf",
+      "type": "object"
+    },
+    "AppInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "vendor": {
+          "title": "Vendor",
+          "type": "string"
+        },
+        "product": {
+          "title": "Product",
+          "type": "string"
+        },
+        "version": {
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "vendor",
+        "product",
+        "version"
+      ],
+      "title": "AppInfo",
+      "type": "object"
+    },
+    "Approval": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "default": "draft",
+          "enum": [
+            "draft",
+            "approved",
+            "deprecated"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "approved_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Approved By"
+        },
+        "approved_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Approved At"
+        },
+        "approved_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Approved Hash"
+        }
+      },
+      "title": "Approval",
+      "type": "object"
+    },
+    "CapabilityPolicy": {
+      "additionalProperties": false,
+      "description": "The safety envelope a capability is willing to operate inside; the\neffective policy at replay time is this narrowed against the deployment\npolicy (narrowest wins), enforced outside this module.",
+      "properties": {
+        "allowed_domains": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Allowed Domains",
+          "type": "array"
+        },
+        "allowed_actions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Allowed Actions",
+          "type": "array"
+        },
+        "allow_coordinate_fallback": {
+          "default": false,
+          "title": "Allow Coordinate Fallback",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "allowed_domains",
+        "allowed_actions"
+      ],
+      "title": "CapabilityPolicy",
+      "type": "object"
+    },
+    "Checkpoint": {
+      "additionalProperties": false,
+      "description": "A condition that must hold for a step (or the whole capability) to\ncount as having actually succeeded, independent of the action itself\nreporting no error.",
+      "properties": {
+        "condition": {
+          "discriminator": {
+            "mapping": {
+              "all_of": "#/$defs/AllOf",
+              "any_of": "#/$defs/AnyOf",
+              "dialog_open": "#/$defs/DialogOpen",
+              "element_absent": "#/$defs/ElementAbsent",
+              "element_visible": "#/$defs/ElementVisible",
+              "not_": "#/$defs/Not",
+              "output_matches": "#/$defs/OutputMatches",
+              "text_present": "#/$defs/TextPresent",
+              "title_matches": "#/$defs/TitleMatches",
+              "url_matches": "#/$defs/UrlMatches",
+              "value_equals": "#/$defs/ValueEquals"
+            },
+            "propertyName": "type"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/UrlMatches"
+            },
+            {
+              "$ref": "#/$defs/TitleMatches"
+            },
+            {
+              "$ref": "#/$defs/TextPresent"
+            },
+            {
+              "$ref": "#/$defs/ElementVisible"
+            },
+            {
+              "$ref": "#/$defs/ElementAbsent"
+            },
+            {
+              "$ref": "#/$defs/ValueEquals"
+            },
+            {
+              "$ref": "#/$defs/OutputMatches"
+            },
+            {
+              "$ref": "#/$defs/DialogOpen"
+            },
+            {
+              "$ref": "#/$defs/AllOf"
+            },
+            {
+              "$ref": "#/$defs/AnyOf"
+            },
+            {
+              "$ref": "#/$defs/Not"
+            }
+          ],
+          "title": "Condition"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        }
+      },
+      "required": [
+        "condition",
+        "description"
+      ],
+      "title": "Checkpoint",
+      "type": "object"
+    },
+    "Contract": {
+      "additionalProperties": false,
+      "description": "The agent-callable surface of a capability: what it needs, what it\nreturns, what it can end in, and what kind of effect it has on the app.",
+      "properties": {
+        "inputs": {
+          "additionalProperties": {
+            "$ref": "#/$defs/InputSpec"
+          },
+          "title": "Inputs",
+          "type": "object"
+        },
+        "outputs": {
+          "additionalProperties": {
+            "$ref": "#/$defs/OutputSpec"
+          },
+          "title": "Outputs",
+          "type": "object"
+        },
+        "outcome_codes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Outcome Codes",
+          "type": "array"
+        },
+        "side_effects": {
+          "enum": [
+            "none",
+            "reads",
+            "creates_record",
+            "modifies"
+          ],
+          "title": "Side Effects",
+          "type": "string"
+        },
+        "idempotent": {
+          "title": "Idempotent",
+          "type": "boolean"
+        },
+        "preconditions": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "all_of": "#/$defs/AllOf",
+                "any_of": "#/$defs/AnyOf",
+                "dialog_open": "#/$defs/DialogOpen",
+                "element_absent": "#/$defs/ElementAbsent",
+                "element_visible": "#/$defs/ElementVisible",
+                "not_": "#/$defs/Not",
+                "output_matches": "#/$defs/OutputMatches",
+                "text_present": "#/$defs/TextPresent",
+                "title_matches": "#/$defs/TitleMatches",
+                "url_matches": "#/$defs/UrlMatches",
+                "value_equals": "#/$defs/ValueEquals"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/UrlMatches"
+              },
+              {
+                "$ref": "#/$defs/TitleMatches"
+              },
+              {
+                "$ref": "#/$defs/TextPresent"
+              },
+              {
+                "$ref": "#/$defs/ElementVisible"
+              },
+              {
+                "$ref": "#/$defs/ElementAbsent"
+              },
+              {
+                "$ref": "#/$defs/ValueEquals"
+              },
+              {
+                "$ref": "#/$defs/OutputMatches"
+              },
+              {
+                "$ref": "#/$defs/DialogOpen"
+              },
+              {
+                "$ref": "#/$defs/AllOf"
+              },
+              {
+                "$ref": "#/$defs/AnyOf"
+              },
+              {
+                "$ref": "#/$defs/Not"
+              }
+            ]
+          },
+          "title": "Preconditions",
+          "type": "array"
+        }
+      },
+      "required": [
+        "inputs",
+        "outputs",
+        "outcome_codes",
+        "side_effects",
+        "idempotent"
+      ],
+      "title": "Contract",
+      "type": "object"
+    },
+    "DialogOpen": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "dialog_open",
+          "default": "dialog_open",
+          "title": "Type",
+          "type": "string"
+        },
+        "pattern": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pattern"
+        },
+        "frame": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FrameMatcher"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "title": "DialogOpen",
+      "type": "object"
+    },
+    "ElementAbsent": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "element_absent",
+          "default": "element_absent",
+          "title": "Type",
+          "type": "string"
+        },
+        "target": {
+          "$ref": "#/$defs/TargetSpec"
+        },
+        "frame": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FrameMatcher"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "target"
+      ],
+      "title": "ElementAbsent",
+      "type": "object"
+    },
+    "ElementVisible": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "element_visible",
+          "default": "element_visible",
+          "title": "Type",
+          "type": "string"
+        },
+        "target": {
+          "$ref": "#/$defs/TargetSpec"
+        },
+        "frame": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FrameMatcher"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "target"
+      ],
+      "title": "ElementVisible",
+      "type": "object"
+    },
+    "ExpectDialog": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": [
+            "confirm",
+            "alert",
+            "prompt"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "pattern": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pattern"
+        },
+        "accept": {
+          "default": true,
+          "title": "Accept",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "ExpectDialog",
+      "type": "object"
+    },
+    "Extraction": {
+      "additionalProperties": false,
+      "description": "Reads one value out of the page and binds it to a named contract output.\n\n`from_` is aliased to `from` on the wire for the same reason `Not.not_`\nis: `from` is a Python keyword.",
+      "properties": {
+        "target": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TargetSpec"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "from": {
+          "enum": [
+            "text",
+            "value",
+            "attribute",
+            "table_cell"
+          ],
+          "title": "From",
+          "type": "string"
+        },
+        "attribute": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Attribute"
+        },
+        "table": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TableSelector"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "parse": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ParseSpec"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "output": {
+          "title": "Output",
+          "type": "string"
+        }
+      },
+      "required": [
+        "from",
+        "output"
+      ],
+      "title": "Extraction",
+      "type": "object"
+    },
+    "FrameMatcher": {
+      "additionalProperties": false,
+      "description": "Selects which frame a condition, screen, or target is evaluated against.\n\nMatched in this order of preference: `url_pattern`, then `name`, then\n`index`. An unnamed `<frame>` element reports `name == \"\"` in the DOM\n(verified against the mock app's frameset), so `name` alone can't\ndisambiguate the common case; `url_pattern` is therefore primary and\n`index` -- positional, and brittle across reloads or frame reordering --\nis the last resort.",
+      "properties": {
+        "url_pattern": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url Pattern"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "index": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Index"
+        }
+      },
+      "title": "FrameMatcher",
+      "type": "object"
+    },
+    "Handling": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "enum": [
+            "stop",
+            "dismiss_dialog",
+            "reload",
+            "click",
+            "escalate"
+          ],
+          "title": "Action",
+          "type": "string"
+        },
+        "target": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TargetSpec"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "max_attempts": {
+          "default": 2,
+          "title": "Max Attempts",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "action"
+      ],
+      "title": "Handling",
+      "type": "object"
+    },
+    "HumanTask": {
+      "additionalProperties": false,
+      "description": "A step the recorder captured as performed by a human, not automation\n(e.g. a step requiring a decision replay can't make on its own).",
+      "properties": {
+        "instructions": {
+          "title": "Instructions",
+          "type": "string"
+        },
+        "required_role": {
+          "default": "supervisor",
+          "title": "Required Role",
+          "type": "string"
+        },
+        "completion_check": {
+          "discriminator": {
+            "mapping": {
+              "all_of": "#/$defs/AllOf",
+              "any_of": "#/$defs/AnyOf",
+              "dialog_open": "#/$defs/DialogOpen",
+              "element_absent": "#/$defs/ElementAbsent",
+              "element_visible": "#/$defs/ElementVisible",
+              "not_": "#/$defs/Not",
+              "output_matches": "#/$defs/OutputMatches",
+              "text_present": "#/$defs/TextPresent",
+              "title_matches": "#/$defs/TitleMatches",
+              "url_matches": "#/$defs/UrlMatches",
+              "value_equals": "#/$defs/ValueEquals"
+            },
+            "propertyName": "type"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/UrlMatches"
+            },
+            {
+              "$ref": "#/$defs/TitleMatches"
+            },
+            {
+              "$ref": "#/$defs/TextPresent"
+            },
+            {
+              "$ref": "#/$defs/ElementVisible"
+            },
+            {
+              "$ref": "#/$defs/ElementAbsent"
+            },
+            {
+              "$ref": "#/$defs/ValueEquals"
+            },
+            {
+              "$ref": "#/$defs/OutputMatches"
+            },
+            {
+              "$ref": "#/$defs/DialogOpen"
+            },
+            {
+              "$ref": "#/$defs/AllOf"
+            },
+            {
+              "$ref": "#/$defs/AnyOf"
+            },
+            {
+              "$ref": "#/$defs/Not"
+            }
+          ],
+          "title": "Completion Check"
+        }
+      },
+      "required": [
+        "instructions",
+        "completion_check"
+      ],
+      "title": "HumanTask",
+      "type": "object"
+    },
+    "InputSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": [
+            "string",
+            "integer",
+            "enum"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "required": {
+          "default": true,
+          "title": "Required",
+          "type": "boolean"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "sensitive": {
+          "default": false,
+          "title": "Sensitive",
+          "type": "boolean"
+        },
+        "source": {
+          "default": "caller",
+          "enum": [
+            "caller",
+            "vault"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "pattern": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pattern"
+        },
+        "enum": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Enum"
+        },
+        "example": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Example"
+        }
+      },
+      "required": [
+        "type",
+        "description"
+      ],
+      "title": "InputSpec",
+      "type": "object"
+    },
+    "Not": {
+      "additionalProperties": false,
+      "description": "Negation. `not` is a Python keyword, so the payload field is `not_`\nin code and aliased to `not` on the wire; `populate_by_name` lets callers\nconstruct it either way.",
+      "properties": {
+        "type": {
+          "const": "not_",
+          "default": "not_",
+          "title": "Type",
+          "type": "string"
+        },
+        "not": {
+          "discriminator": {
+            "mapping": {
+              "all_of": "#/$defs/AllOf",
+              "any_of": "#/$defs/AnyOf",
+              "dialog_open": "#/$defs/DialogOpen",
+              "element_absent": "#/$defs/ElementAbsent",
+              "element_visible": "#/$defs/ElementVisible",
+              "not_": "#/$defs/Not",
+              "output_matches": "#/$defs/OutputMatches",
+              "text_present": "#/$defs/TextPresent",
+              "title_matches": "#/$defs/TitleMatches",
+              "url_matches": "#/$defs/UrlMatches",
+              "value_equals": "#/$defs/ValueEquals"
+            },
+            "propertyName": "type"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/UrlMatches"
+            },
+            {
+              "$ref": "#/$defs/TitleMatches"
+            },
+            {
+              "$ref": "#/$defs/TextPresent"
+            },
+            {
+              "$ref": "#/$defs/ElementVisible"
+            },
+            {
+              "$ref": "#/$defs/ElementAbsent"
+            },
+            {
+              "$ref": "#/$defs/ValueEquals"
+            },
+            {
+              "$ref": "#/$defs/OutputMatches"
+            },
+            {
+              "$ref": "#/$defs/DialogOpen"
+            },
+            {
+              "$ref": "#/$defs/AllOf"
+            },
+            {
+              "$ref": "#/$defs/AnyOf"
+            },
+            {
+              "$ref": "#/$defs/Not"
+            }
+          ],
+          "title": "Not"
+        },
+        "frame": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FrameMatcher"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "not"
+      ],
+      "title": "Not",
+      "type": "object"
+    },
+    "Outcome": {
+      "additionalProperties": false,
+      "description": "A runtime condition replay must be able to recognise and react to.\n\n`origin` records where this outcome came from: `discovered` (the model\nhit it during the recording run itself), `library` (merged in from a\ncurated per-app outcomes library), or `reviewer` (hand-authored). A\nsingle happy-path discovery run cannot observe things like \"record not\nfound\" or \"system busy\" -- they simply don't happen on the path that was\nrecorded -- so most of an artifact's outcomes are necessarily merged in\nfrom elsewhere. Recording provenance per outcome keeps that honest\ninstead of implying every outcome was empirically observed.",
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "business",
+            "transient",
+            "interstitial",
+            "auth",
+            "requires_human",
+            "app_error"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "origin": {
+          "enum": [
+            "discovered",
+            "library",
+            "reviewer"
+          ],
+          "title": "Origin",
+          "type": "string"
+        },
+        "scope": {
+          "anyOf": [
+            {
+              "const": "global",
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          ],
+          "default": "global",
+          "title": "Scope"
+        },
+        "detect": {
+          "discriminator": {
+            "mapping": {
+              "all_of": "#/$defs/AllOf",
+              "any_of": "#/$defs/AnyOf",
+              "dialog_open": "#/$defs/DialogOpen",
+              "element_absent": "#/$defs/ElementAbsent",
+              "element_visible": "#/$defs/ElementVisible",
+              "not_": "#/$defs/Not",
+              "output_matches": "#/$defs/OutputMatches",
+              "text_present": "#/$defs/TextPresent",
+              "title_matches": "#/$defs/TitleMatches",
+              "url_matches": "#/$defs/UrlMatches",
+              "value_equals": "#/$defs/ValueEquals"
+            },
+            "propertyName": "type"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/UrlMatches"
+            },
+            {
+              "$ref": "#/$defs/TitleMatches"
+            },
+            {
+              "$ref": "#/$defs/TextPresent"
+            },
+            {
+              "$ref": "#/$defs/ElementVisible"
+            },
+            {
+              "$ref": "#/$defs/ElementAbsent"
+            },
+            {
+              "$ref": "#/$defs/ValueEquals"
+            },
+            {
+              "$ref": "#/$defs/OutputMatches"
+            },
+            {
+              "$ref": "#/$defs/DialogOpen"
+            },
+            {
+              "$ref": "#/$defs/AllOf"
+            },
+            {
+              "$ref": "#/$defs/AnyOf"
+            },
+            {
+              "$ref": "#/$defs/Not"
+            }
+          ],
+          "title": "Detect"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "handling": {
+          "$ref": "#/$defs/Handling"
+        },
+        "result_outputs": {
+          "additionalProperties": {
+            "$ref": "#/$defs/Extraction"
+          },
+          "title": "Result Outputs",
+          "type": "object"
+        }
+      },
+      "required": [
+        "code",
+        "kind",
+        "origin",
+        "detect",
+        "message",
+        "handling"
+      ],
+      "title": "Outcome",
+      "type": "object"
+    },
+    "OutputMatches": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "output_matches",
+          "default": "output_matches",
+          "title": "Type",
+          "type": "string"
+        },
+        "output": {
+          "title": "Output",
+          "type": "string"
+        },
+        "pattern": {
+          "title": "Pattern",
+          "type": "string"
+        },
+        "frame": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FrameMatcher"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "output",
+        "pattern"
+      ],
+      "title": "OutputMatches",
+      "type": "object"
+    },
+    "OutputSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": [
+            "string",
+            "integer",
+            "money",
+            "date"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "source_step": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Step"
+        }
+      },
+      "required": [
+        "type",
+        "description"
+      ],
+      "title": "OutputSpec",
+      "type": "object"
+    },
+    "ParseSpec": {
+      "additionalProperties": false,
+      "description": "Post-processing applied to a raw extracted string before it becomes an output.",
+      "properties": {
+        "type": {
+          "enum": [
+            "string",
+            "int",
+            "money",
+            "date"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "regex": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Regex"
+        },
+        "group": {
+          "default": 0,
+          "title": "Group",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "ParseSpec",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "description": "How this artifact came to exist, for audit and for reproducing a discovery run.",
+      "properties": {
+        "source_goal": {
+          "title": "Source Goal",
+          "type": "string"
+        },
+        "discovery_run_id": {
+          "title": "Discovery Run Id",
+          "type": "string"
+        },
+        "model": {
+          "title": "Model",
+          "type": "string"
+        },
+        "prompt_version": {
+          "title": "Prompt Version",
+          "type": "string"
+        },
+        "recorded_at": {
+          "title": "Recorded At",
+          "type": "string"
+        },
+        "recorded_against": {
+          "additionalProperties": true,
+          "title": "Recorded Against",
+          "type": "object"
+        },
+        "evidence_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Evidence Ref"
+        },
+        "raw_artifact_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Raw Artifact Ref"
+        }
+      },
+      "required": [
+        "source_goal",
+        "discovery_run_id",
+        "model",
+        "prompt_version",
+        "recorded_against"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "Risk": {
+      "additionalProperties": false,
+      "description": "A step's blast radius, and how to find out if it already happened.\n\n`idempotency_check` is what lets a recovery ask \"did this already go\nthrough?\" before retrying a step that failed after it may have already\ntaken effect. A risky (or irreversible) step with no idempotency_check\nis never retried by the replay engine -- there is no safe way to tell\nwhether a retry would double the effect, so the only sound move is to\nstop and escalate.",
+      "properties": {
+        "level": {
+          "enum": [
+            "safe",
+            "risky",
+            "irreversible"
+          ],
+          "title": "Level",
+          "type": "string"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        },
+        "requires_confirmation": {
+          "default": false,
+          "title": "Requires Confirmation",
+          "type": "boolean"
+        },
+        "idempotency_check": {
+          "anyOf": [
+            {
+              "discriminator": {
+                "mapping": {
+                  "all_of": "#/$defs/AllOf",
+                  "any_of": "#/$defs/AnyOf",
+                  "dialog_open": "#/$defs/DialogOpen",
+                  "element_absent": "#/$defs/ElementAbsent",
+                  "element_visible": "#/$defs/ElementVisible",
+                  "not_": "#/$defs/Not",
+                  "output_matches": "#/$defs/OutputMatches",
+                  "text_present": "#/$defs/TextPresent",
+                  "title_matches": "#/$defs/TitleMatches",
+                  "url_matches": "#/$defs/UrlMatches",
+                  "value_equals": "#/$defs/ValueEquals"
+                },
+                "propertyName": "type"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/UrlMatches"
+                },
+                {
+                  "$ref": "#/$defs/TitleMatches"
+                },
+                {
+                  "$ref": "#/$defs/TextPresent"
+                },
+                {
+                  "$ref": "#/$defs/ElementVisible"
+                },
+                {
+                  "$ref": "#/$defs/ElementAbsent"
+                },
+                {
+                  "$ref": "#/$defs/ValueEquals"
+                },
+                {
+                  "$ref": "#/$defs/OutputMatches"
+                },
+                {
+                  "$ref": "#/$defs/DialogOpen"
+                },
+                {
+                  "$ref": "#/$defs/AllOf"
+                },
+                {
+                  "$ref": "#/$defs/AnyOf"
+                },
+                {
+                  "$ref": "#/$defs/Not"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Idempotency Check"
+        }
+      },
+      "required": [
+        "level"
+      ],
+      "title": "Risk",
+      "type": "object"
+    },
+    "RowWhere": {
+      "additionalProperties": false,
+      "description": "Selects a row in an extracted table by matching one of its cells.",
+      "properties": {
+        "header": {
+          "title": "Header",
+          "type": "string"
+        },
+        "matches": {
+          "title": "Matches",
+          "type": "string"
+        }
+      },
+      "required": [
+        "header",
+        "matches"
+      ],
+      "title": "RowWhere",
+      "type": "object"
+    },
+    "Screen": {
+      "additionalProperties": false,
+      "description": "A named, recognisable state of the app, used to detect drift.\n\n`url_pattern` and `landmarks` are evaluated against the frame that\n`frame` selects, never the top document. In a frameset (nav + main, as\nin the mock app), the top-level URL never changes across login, lookup,\nand member detail -- only the inner frame's URL does. Matching the top\ndocument would make `UNEXPECTED_SCREEN` structurally unfireable, since\nevery screen would look identical from that vantage point.",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "frame": {
+          "$ref": "#/$defs/FrameMatcher"
+        },
+        "url_pattern": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url Pattern"
+        },
+        "landmarks": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "all_of": "#/$defs/AllOf",
+                "any_of": "#/$defs/AnyOf",
+                "dialog_open": "#/$defs/DialogOpen",
+                "element_absent": "#/$defs/ElementAbsent",
+                "element_visible": "#/$defs/ElementVisible",
+                "not_": "#/$defs/Not",
+                "output_matches": "#/$defs/OutputMatches",
+                "text_present": "#/$defs/TextPresent",
+                "title_matches": "#/$defs/TitleMatches",
+                "url_matches": "#/$defs/UrlMatches",
+                "value_equals": "#/$defs/ValueEquals"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/UrlMatches"
+              },
+              {
+                "$ref": "#/$defs/TitleMatches"
+              },
+              {
+                "$ref": "#/$defs/TextPresent"
+              },
+              {
+                "$ref": "#/$defs/ElementVisible"
+              },
+              {
+                "$ref": "#/$defs/ElementAbsent"
+              },
+              {
+                "$ref": "#/$defs/ValueEquals"
+              },
+              {
+                "$ref": "#/$defs/OutputMatches"
+              },
+              {
+                "$ref": "#/$defs/DialogOpen"
+              },
+              {
+                "$ref": "#/$defs/AllOf"
+              },
+              {
+                "$ref": "#/$defs/AnyOf"
+              },
+              {
+                "$ref": "#/$defs/Not"
+              }
+            ]
+          },
+          "title": "Landmarks",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "description",
+        "frame",
+        "landmarks"
+      ],
+      "title": "Screen",
+      "type": "object"
+    },
+    "Step": {
+      "additionalProperties": false,
+      "description": "One recorded action (or human task) in a capability's fixed sequence.",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "navigate",
+            "click",
+            "type",
+            "select",
+            "press",
+            "extract",
+            "assert",
+            "wait",
+            "human_task"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "screen": {
+          "title": "Screen",
+          "type": "string"
+        },
+        "intent": {
+          "title": "Intent",
+          "type": "string"
+        },
+        "origin": {
+          "default": "agent",
+          "enum": [
+            "agent",
+            "human"
+          ],
+          "title": "Origin",
+          "type": "string"
+        },
+        "target": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TargetSpec"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value"
+        },
+        "expect_dialog": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ExpectDialog"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "wait": {
+          "$ref": "#/$defs/WaitSpec"
+        },
+        "checkpoint": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Checkpoint"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "extract": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Extraction"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "risk": {
+          "$ref": "#/$defs/Risk"
+        },
+        "human_task": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HumanTask"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "screen",
+        "intent",
+        "wait",
+        "risk"
+      ],
+      "title": "Step",
+      "type": "object"
+    },
+    "Strategy": {
+      "additionalProperties": false,
+      "description": "One way to (re)locate a target element, tried in list order at replay.\n\n`rationale` is required and non-empty: it is where the recorder (or a\nreviewer) records *why* this strategy should keep resolving to the right\nelement when the DOM shifts slightly. That reasoning-about-robustness is\nwhat the brief asks for -- a strategy with no rationale is just a guess\nthat happened to work once.",
+      "properties": {
+        "kind": {
+          "enum": [
+            "role",
+            "text",
+            "relative",
+            "structural",
+            "bbox"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": true,
+          "title": "Params",
+          "type": "object"
+        },
+        "rationale": {
+          "minLength": 1,
+          "title": "Rationale",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "params",
+        "rationale"
+      ],
+      "title": "Strategy",
+      "type": "object"
+    },
+    "TableSelector": {
+      "additionalProperties": false,
+      "properties": {
+        "header_match": {
+          "title": "Header Match",
+          "type": "string"
+        },
+        "row_where": {
+          "$ref": "#/$defs/RowWhere"
+        }
+      },
+      "required": [
+        "header_match",
+        "row_where"
+      ],
+      "title": "TableSelector",
+      "type": "object"
+    },
+    "TargetApp": {
+      "additionalProperties": false,
+      "properties": {
+        "surface": {
+          "const": "web",
+          "default": "web",
+          "title": "Surface",
+          "type": "string"
+        },
+        "app": {
+          "$ref": "#/$defs/AppInfo"
+        },
+        "entry_url": {
+          "title": "Entry Url",
+          "type": "string"
+        },
+        "fingerprint": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "all_of": "#/$defs/AllOf",
+                "any_of": "#/$defs/AnyOf",
+                "dialog_open": "#/$defs/DialogOpen",
+                "element_absent": "#/$defs/ElementAbsent",
+                "element_visible": "#/$defs/ElementVisible",
+                "not_": "#/$defs/Not",
+                "output_matches": "#/$defs/OutputMatches",
+                "text_present": "#/$defs/TextPresent",
+                "title_matches": "#/$defs/TitleMatches",
+                "url_matches": "#/$defs/UrlMatches",
+                "value_equals": "#/$defs/ValueEquals"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/UrlMatches"
+              },
+              {
+                "$ref": "#/$defs/TitleMatches"
+              },
+              {
+                "$ref": "#/$defs/TextPresent"
+              },
+              {
+                "$ref": "#/$defs/ElementVisible"
+              },
+              {
+                "$ref": "#/$defs/ElementAbsent"
+              },
+              {
+                "$ref": "#/$defs/ValueEquals"
+              },
+              {
+                "$ref": "#/$defs/OutputMatches"
+              },
+              {
+                "$ref": "#/$defs/DialogOpen"
+              },
+              {
+                "$ref": "#/$defs/AllOf"
+              },
+              {
+                "$ref": "#/$defs/AnyOf"
+              },
+              {
+                "$ref": "#/$defs/Not"
+              }
+            ]
+          },
+          "title": "Fingerprint",
+          "type": "array"
+        }
+      },
+      "required": [
+        "app",
+        "entry_url"
+      ],
+      "title": "TargetApp",
+      "type": "object"
+    },
+    "TargetSpec": {
+      "additionalProperties": false,
+      "description": "Everything needed to find one element again on replay, without a model.\n\n`strategies` is ordered: replay tries them in sequence and records every\nattempt (see `hands.schema.result.StrategyAttempt`), so a later,\ncoarser strategy (e.g. `bbox`) is a documented fallback, not a hidden\none. `snapshot` carries a discovery-time-only descriptor (role, name,\nbbox, viewport) used purely as forensic context on failure; replay never\nresolves against it.",
+      "properties": {
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "frame": {
+          "$ref": "#/$defs/FrameMatcher"
+        },
+        "strategies": {
+          "items": {
+            "$ref": "#/$defs/Strategy"
+          },
+          "minItems": 1,
+          "title": "Strategies",
+          "type": "array"
+        },
+        "snapshot": {
+          "additionalProperties": true,
+          "title": "Snapshot",
+          "type": "object"
+        }
+      },
+      "required": [
+        "description",
+        "frame",
+        "strategies"
+      ],
+      "title": "TargetSpec",
+      "type": "object"
+    },
+    "TextPresent": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "text_present",
+          "default": "text_present",
+          "title": "Type",
+          "type": "string"
+        },
+        "pattern": {
+          "title": "Pattern",
+          "type": "string"
+        },
+        "negate": {
+          "default": false,
+          "title": "Negate",
+          "type": "boolean"
+        },
+        "frame": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FrameMatcher"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "pattern"
+      ],
+      "title": "TextPresent",
+      "type": "object"
+    },
+    "TitleMatches": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "title_matches",
+          "default": "title_matches",
+          "title": "Type",
+          "type": "string"
+        },
+        "pattern": {
+          "title": "Pattern",
+          "type": "string"
+        },
+        "frame": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FrameMatcher"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "pattern"
+      ],
+      "title": "TitleMatches",
+      "type": "object"
+    },
+    "UrlMatches": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "url_matches",
+          "default": "url_matches",
+          "title": "Type",
+          "type": "string"
+        },
+        "pattern": {
+          "title": "Pattern",
+          "type": "string"
+        },
+        "frame": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FrameMatcher"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "pattern"
+      ],
+      "title": "UrlMatches",
+      "type": "object"
+    },
+    "ValueEquals": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "value_equals",
+          "default": "value_equals",
+          "title": "Type",
+          "type": "string"
+        },
+        "target": {
+          "$ref": "#/$defs/TargetSpec"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        },
+        "frame": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FrameMatcher"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "target",
+        "value"
+      ],
+      "title": "ValueEquals",
+      "type": "object"
+    },
+    "WaitSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "until": {
+          "anyOf": [
+            {
+              "discriminator": {
+                "mapping": {
+                  "all_of": "#/$defs/AllOf",
+                  "any_of": "#/$defs/AnyOf",
+                  "dialog_open": "#/$defs/DialogOpen",
+                  "element_absent": "#/$defs/ElementAbsent",
+                  "element_visible": "#/$defs/ElementVisible",
+                  "not_": "#/$defs/Not",
+                  "output_matches": "#/$defs/OutputMatches",
+                  "text_present": "#/$defs/TextPresent",
+                  "title_matches": "#/$defs/TitleMatches",
+                  "url_matches": "#/$defs/UrlMatches",
+                  "value_equals": "#/$defs/ValueEquals"
+                },
+                "propertyName": "type"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/UrlMatches"
+                },
+                {
+                  "$ref": "#/$defs/TitleMatches"
+                },
+                {
+                  "$ref": "#/$defs/TextPresent"
+                },
+                {
+                  "$ref": "#/$defs/ElementVisible"
+                },
+                {
+                  "$ref": "#/$defs/ElementAbsent"
+                },
+                {
+                  "$ref": "#/$defs/ValueEquals"
+                },
+                {
+                  "$ref": "#/$defs/OutputMatches"
+                },
+                {
+                  "$ref": "#/$defs/DialogOpen"
+                },
+                {
+                  "$ref": "#/$defs/AllOf"
+                },
+                {
+                  "$ref": "#/$defs/AnyOf"
+                },
+                {
+                  "$ref": "#/$defs/Not"
+                }
+              ]
+            },
+            {
+              "const": "load",
+              "type": "string"
+            }
+          ],
+          "default": "load",
+          "title": "Until"
+        },
+        "timeout_ms": {
+          "default": 10000,
+          "title": "Timeout Ms",
+          "type": "integer"
+        }
+      },
+      "title": "WaitSpec",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "A recorded, typed, replayable UI flow.\n\nThis is the artifact a discovery run produces and a replay run consumes\nwith no model in the loop. `compute_content_hash` / `with_content_hash`\n/ `is_effectively_approved` exist to make \"was this exact behaviour\nreviewed\" a checkable fact rather than a matter of trusting the\n`approval.status` field in isolation.",
+  "properties": {
+    "schema_version": {
+      "const": "1.0",
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "name": {
+      "title": "Name",
+      "type": "string"
+    },
+    "version": {
+      "default": "1.0.0",
+      "title": "Version",
+      "type": "string"
+    },
+    "description": {
+      "title": "Description",
+      "type": "string"
+    },
+    "content_hash": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Content Hash"
+    },
+    "approval": {
+      "$ref": "#/$defs/Approval"
+    },
+    "contract": {
+      "$ref": "#/$defs/Contract"
+    },
+    "target": {
+      "$ref": "#/$defs/TargetApp"
+    },
+    "screens": {
+      "additionalProperties": {
+        "$ref": "#/$defs/Screen"
+      },
+      "title": "Screens",
+      "type": "object"
+    },
+    "steps": {
+      "items": {
+        "$ref": "#/$defs/Step"
+      },
+      "title": "Steps",
+      "type": "array"
+    },
+    "outcomes": {
+      "items": {
+        "$ref": "#/$defs/Outcome"
+      },
+      "title": "Outcomes",
+      "type": "array"
+    },
+    "success": {
+      "$ref": "#/$defs/Checkpoint"
+    },
+    "policy": {
+      "$ref": "#/$defs/CapabilityPolicy"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    }
+  },
+  "required": [
+    "id",
+    "name",
+    "description",
+    "approval",
+    "contract",
+    "target",
+    "screens",
+    "steps",
+    "outcomes",
+    "success",
+    "policy",
+    "provenance"
+  ],
+  "title": "Capability",
+  "type": "object"
+}

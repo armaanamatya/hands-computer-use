@@ -1,0 +1,50 @@
+{
+  "name": "Look up savings balance",
+  "description": "Signs on to LegacyCore, looks up a member by id, and extracts their current savings balance.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "member_id": {
+        "type": "string",
+        "description": "Member number to look up",
+        "pattern": "^\\d{5}$",
+        "examples": [
+          "12345"
+        ]
+      },
+      "username": {
+        "type": "string",
+        "description": "Teller sign-on username",
+        "examples": [
+          "teller1"
+        ]
+      },
+      "password": {
+        "type": "string",
+        "description": "Teller sign-on password (supplied from a vault; never echoed)"
+      }
+    },
+    "required": [
+      "member_id",
+      "username",
+      "password"
+    ],
+    "additionalProperties": false
+  },
+  "outputs": {
+    "savings_balance": {
+      "type": "string",
+      "description": "The member's current savings balance"
+    }
+  },
+  "outcome_codes": [
+    "MEMBER_NOT_FOUND",
+    "ACCOUNT_RESTRICTED",
+    "SYSTEM_BUSY",
+    "SESSION_EXPIRED",
+    "APP_ERROR",
+    "UNEXPECTED_CONFIRM"
+  ],
+  "side_effects": "reads",
+  "idempotent": true
+}
