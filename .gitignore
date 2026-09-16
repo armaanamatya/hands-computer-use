@@ -1,0 +1,24 @@
+# secrets
+.env
+*.pem
+
+# python
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+
+# raw run output (curated evidence under evidence/<scenario>/ IS committed)
+evidence/runs/
+
+# editors / os
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# the assignment brief is interface.ai material, not ours to publish
+Assignment*.pdf
