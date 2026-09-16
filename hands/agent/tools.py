@@ -189,10 +189,29 @@ TOOL_DEFS: list[dict[str, Any]] = [
         "input_schema": {
             "type": "object",
             "properties": {
+                # An array of explicit name/value pairs rather than an
+                # open-ended object. A map typed as
+                # `additionalProperties: {type: string}` cannot satisfy
+                # strict function calling, which requires
+                # `additionalProperties: false` on every nested object, so
+                # the map form is rejected outright by at least one
+                # provider. The pair list carries the same information and
+                # is strict-clean everywhere.
                 "outputs": {
-                    "type": "object",
-                    "description": "Map of output name to captured value, for every output the goal required.",
-                    "additionalProperties": {"type": "string"},
+                    "type": "array",
+                    "description": "Every value the goal asked you to capture, one entry per output.",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "type": "string",
+                                "description": "The output name, exactly as you passed it to read_value.",
+                            },
+                            "value": {"type": "string", "description": "The captured value."},
+                        },
+                        "required": ["name", "value"],
+                        "additionalProperties": False,
+                    },
                 },
                 "summary": {"type": "string", "description": "A short summary of what was done and found."},
                 "reason": _REASON_PROP,
