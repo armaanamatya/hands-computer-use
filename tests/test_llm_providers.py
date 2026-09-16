@@ -31,6 +31,7 @@ from hands.agent.llm import (
     _FakeTextBlock,
     _FakeToolUseBlock,
     _messages_to_responses_input,
+    _reasoning_item_to_param,
     _response_to_blocks,
     _tools_to_responses,
 )
@@ -87,6 +88,17 @@ def _stub_refusal_part(text: str) -> SimpleNamespace:
 
 def _stub_message(parts: list[Any]) -> SimpleNamespace:
     return SimpleNamespace(type="message", content=parts)
+
+
+def _stub_reasoning(id_: str, encrypted_content: str = "opaque-blob", summary_text: str = "thinking...") -> SimpleNamespace:
+    return SimpleNamespace(
+        type="reasoning",
+        id=id_,
+        summary=[SimpleNamespace(type="summary_text", text=summary_text)],
+        content=None,
+        encrypted_content=encrypted_content,
+        status="completed",
+    )
 
 
 def _stub_response(
@@ -388,3 +400,184 @@ def test_openai_provider_complete_end_to_end_with_stub_client() -> None:
     assert call_kwargs["instructions"] == "be helpful"
     assert call_kwargs["tools"][0]["type"] == "function"
     assert call_kwargs["input"][0]["role"] == "user"
+    # `include=["reasoning.encrypted_content"]` is required to get
+    # encrypted_content populated when context is managed manually/
+    # statelessly, which is exactly what this adapter does.
+    assert call_kwargs["include"] == ["reasoning.encrypted_content"]
+
+
+# --------------------------------------------- reasoning-item replay (stateful)
+
+def test_reasoning_item_replayed_immediately_before_its_function_call() -> None:
+    stub_response = _stub_response(
+        output=[
+            _stub_reasoning("rs_1", encrypted_content="blob-1"),
+            _stub_function_call("call_1", "click", '{"element": 1, "reason": "go"}'),
+        ],
+        status="completed",
+    )
+    client = _StubClient(stub_response)
+    provider = OpenAIProvider(model="gpt-5.6", client=client)
+
+    first_messages = [{"role": "user", "content": [{"type": "text", "text": "go"}]}]
+    resp = provider.complete(system="sys", messages=first_messages, tools=[])
+    assert resp.stop_reason == "tool_use"
+    [block] = resp.content_blocks
+    assert block.type == "tool_use" and block.id == "call_1"
+
+    # Next turn: replay the assistant turn (exactly as loop.py stores
+    # `resp.content_blocks` verbatim) plus a tool_result, through the SAME
+    # provider instance, and inspect what would be sent as `input`.
+    next_messages = first_messages + [
+        {"role": "assistant", "content": resp.content_blocks},
+        {
+            "role": "user",
+            "content": [{"type": "tool_result", "tool_use_id": "call_1", "content": "ok", "is_error": False}],
+        },
+    ]
+    items = provider._build_input_items(next_messages)
+
+    call_idx = next(i for i, it in enumerate(items) if it.get("type") == "function_call")
+    assert call_idx > 0
+    reasoning_item = items[call_idx - 1]
+    assert reasoning_item["type"] == "reasoning"
+    assert reasoning_item["id"] == "rs_1"
+    # encrypted_content preserved verbatim, not reconstructed/summarized.
+    assert reasoning_item["encrypted_content"] == "blob-1"
+    assert items[call_idx]["call_id"] == "call_1"
+
+
+def test_reasoning_ordering_holds_for_two_function_calls_in_one_turn() -> None:
+    stub_response = _stub_response(
+        output=[
+            _stub_reasoning("rs_1", encrypted_content="blob-1"),
+            _stub_function_call("call_1", "click", '{"element": 1, "reason": "a"}'),
+            _stub_reasoning("rs_2", encrypted_content="blob-2"),
+            _stub_function_call("call_2", "click", '{"element": 2, "reason": "b"}'),
+        ],
+        status="completed",
+    )
+    client = _StubClient(stub_response)
+    provider = OpenAIProvider(model="gpt-5.6", client=client)
+
+    first_messages = [{"role": "user", "content": [{"type": "text", "text": "go"}]}]
+    resp = provider.complete(system="sys", messages=first_messages, tools=[])
+    assert resp.stop_reason == "tool_use"
+    assert len(resp.content_blocks) == 2
+
+    next_messages = first_messages + [{"role": "assistant", "content": resp.content_blocks}]
+    items = provider._build_input_items(next_messages)
+
+    kinds = [(it.get("type"), it.get("id") or it.get("call_id")) for it in items if it.get("type") in ("reasoning", "function_call")]
+    assert kinds == [
+        ("reasoning", "rs_1"),
+        ("function_call", "call_1"),
+        ("reasoning", "rs_2"),
+        ("function_call", "call_2"),
+    ]
+
+
+def test_no_reasoning_seen_matches_stateless_translation_exactly() -> None:
+    # A provider instance that never recorded a reasoning item must behave
+    # identically to the plain (non-reasoning) request translator - no
+    # regression for models/providers that never emit reasoning items.
+    provider = OpenAIProvider(model="gpt-5.6")
+    messages: list[dict[str, Any]] = [
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "hello there"},
+                {"type": "image", "source": {"type": "base64", "media_type": "image/png", "data": "QUJD"}},
+            ],
+        },
+        {
+            "role": "assistant",
+            "content": [_FakeToolUseBlock(id="call_1", name="click", input={"element": 3, "reason": "clicking"})],
+        },
+        {
+            "role": "user",
+            "content": [
+                {"type": "tool_result", "tool_use_id": "call_1", "content": "ok, url now https://x/", "is_error": False}
+            ],
+        },
+    ]
+    assert provider._build_input_items(messages) == _messages_to_responses_input(messages)
+
+
+def test_reasoning_map_is_bounded_across_many_turns() -> None:
+    provider = OpenAIProvider(model="gpt-5.6", max_reasoning_entries=5)
+    for i in range(50):
+        stub_response = _stub_response(
+            output=[
+                _stub_reasoning(f"rs_{i}", encrypted_content=f"blob-{i}"),
+                _stub_function_call(f"call_{i}", "click", '{"element": 1, "reason": "x"}'),
+            ],
+            status="completed",
+        )
+        provider._client = _StubClient(stub_response)
+        provider.complete(
+            system="sys", messages=[{"role": "user", "content": [{"type": "text", "text": "go"}]}], tools=[]
+        )
+
+    assert len(provider._reasoning_by_call_id) <= 5
+    # And it kept the most recent entries (FIFO eviction of the oldest),
+    # not an arbitrary subset.
+    assert "call_49" in provider._reasoning_by_call_id
+    assert "call_0" not in provider._reasoning_by_call_id
+
+
+def test_reasoning_content_field_survives_verbatim_alongside_encrypted_content() -> None:
+    # Real GPT-5-class output can carry both `content` (reasoning_text
+    # parts) and `encrypted_content` on the same item; both must round-trip
+    # byte-for-byte, since this adapter never reconstructs or summarizes
+    # opaque reasoning state.
+    reasoning = SimpleNamespace(
+        type="reasoning",
+        id="rs_1",
+        summary=[SimpleNamespace(type="summary_text", text="summary text")],
+        content=[SimpleNamespace(type="reasoning_text", text="the actual chain-of-thought text")],
+        encrypted_content="blob-1",
+        status="completed",
+    )
+    param = _reasoning_item_to_param(reasoning)
+
+    assert param["type"] == "reasoning"
+    assert param["id"] == "rs_1"
+    assert param["summary"] == [{"type": "summary_text", "text": "summary text"}]
+    assert param["content"] == [{"type": "reasoning_text", "text": "the actual chain-of-thought text"}]
+    assert param["encrypted_content"] == "blob-1"
+    assert param["status"] == "completed"
+
+
+def test_reasoning_survives_a_message_between_it_and_the_function_call() -> None:
+    # A `[reasoning, message(commentary), function_call]` turn is plausible
+    # for a reasoning model. The failure this mechanism exists to prevent is
+    # the API rejecting a function_call that arrives without its required
+    # reasoning item, so intervening commentary must NOT discard the span.
+    # Re-emitting it just before the call also preserves the order it had in
+    # the original turn, so keeping it cannot itself reorder anything.
+    stub_response = _stub_response(
+        output=[
+            _stub_reasoning("rs_1", encrypted_content="blob-1"),
+            _stub_message([_stub_text_part("I will click the submit button now.")]),
+            _stub_function_call("call_1", "click", '{"element": 1, "reason": "submit"}'),
+        ],
+        status="completed",
+    )
+    client = _StubClient(stub_response)
+    provider = OpenAIProvider(model="gpt-5.6", client=client)
+
+    first_messages = [{"role": "user", "content": [{"type": "text", "text": "go"}]}]
+    resp = provider.complete(system="sys", messages=first_messages, tools=[])
+    assert resp.stop_reason == "tool_use"
+
+    assert "call_1" in provider._reasoning_by_call_id
+
+    next_messages = first_messages + [{"role": "assistant", "content": resp.content_blocks}]
+    items = provider._build_input_items(next_messages)
+    types = [it.get("type") for it in items]
+    assert "reasoning" in types, "reasoning span must survive intervening commentary"
+    # ...and must still sit immediately before the call it belongs to.
+    assert types.index("reasoning") == types.index("function_call") - 1
+    reasoning_item = items[types.index("reasoning")]
+    assert reasoning_item.get("encrypted_content") == "blob-1"
