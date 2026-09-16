@@ -259,7 +259,9 @@ class SessionController:
 
     def guard(self, token: ControlToken) -> None:
         """Raise `NotInControl` unless `token` is an AUTOMATION token at the
-        CURRENT epoch. Wired as `WebSurface(page, guard=controller.guard)`.
+        CURRENT epoch, AND the controller's own live state currently agrees
+        that automation holds the session. Wired as
+        `WebSurface(page, guard=controller.guard)`.
 
         Why the epoch, specifically, and not just the holder: `holder` alone
         would let a token minted at epoch 3 (before some handoff) still pass
@@ -270,12 +272,32 @@ class SessionController:
         "a step issued before a handoff" into something that is
         *structurally* incapable of landing after it, rather than merely
         unlikely to.
+
+        Why ALSO check live state, on top of holder+epoch: "who is in
+        control" should be answerable from exactly one authority -- this
+        controller's own `_state`/`_holder` -- not reconstructed piecemeal
+        from a token's fields plus a separate epoch comparison. Two sources
+        that can disagree is the bug this design exists to prevent, and the
+        extra check costs nothing. Concretely, `HANDOFF_PENDING` maps to
+        `ControlHolder.AUTOMATION` (see `_STATE_HOLDER`) with NO epoch bump
+        -- a request_handoff() alone does not change who last held a valid
+        token. Without this check, a token minted just before
+        `request_handoff()` (holder=automation, epoch still current) would
+        pass `guard()` for the whole HANDOFF_PENDING window, even though a
+        handoff is already in flight and automation should not be acting.
+        Requiring `self._state == ControlState.AUTOMATION_ACTIVE` (not just
+        `self._holder == ControlHolder.AUTOMATION`) closes that window: a
+        token is only honoured while the controller is unambiguously,
+        currently, automation's to act with.
         """
-        if token.holder != ControlHolder.AUTOMATION or token.epoch != self._epoch:
+        live_ok = self._state == ControlState.AUTOMATION_ACTIVE and self._holder == ControlHolder.AUTOMATION
+        if token.holder != ControlHolder.AUTOMATION or token.epoch != self._epoch or not live_ok:
             raise NotInControl(
                 f"token (holder={token.holder.value}, epoch={token.epoch}) is not in control; "
-                f"current holder={self._holder.value}, epoch={self._epoch}. A token issued before "
-                f"a handoff must not be able to act after it -- this is that guarantee firing."
+                f"current live state={self._state.value} holder={self._holder.value} epoch={self._epoch}. "
+                f"A token issued before a handoff must not be able to act after it, and automation may only "
+                f"act while the controller's own live state agrees it holds the session "
+                f"(state=AUTOMATION_ACTIVE, holder=automation) -- this is that guarantee firing."
             )
 
     # ------------------------------------------------------------ handoff
