@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Member Detail{% endblock %}
+{% block heading %}Member Detail{% endblock %}
+{% block body %}
+<table border="1" cellpadding="3" cellspacing="0" class="c5">
+<tr><td class="c2">Member No.</td><td>{{ mno }}</td><td class="c2">Status</td><td>{{ m.status }}</td></tr>
+<tr><td class="c2">Name</td><td>{{ m.name }}</td><td class="c2">Member Since</td><td>{{ m.since }}</td></tr>
+</table>
+<br>
+<table border="0" cellpadding="2"><tr><td><b>Accounts</b></td></tr></table>
+<table border="1" cellpadding="3" cellspacing="0" class="c5">
+<tr><td class="c2"><b>Acct No</b></td><td class="c2"><b>Type</b></td><td class="c2" align="right"><b>Curr Bal</b></td><td class="c2" align="right"><b>Avail Bal</b></td><td class="c2"><b>Status</b></td></tr>
+{% for a in m.accounts %}
+<tr><td>{{ a[0] }}</td><td>{{ a[1] }}</td><td align="right">{{ a[2] }}</td><td align="right">{{ a[3] }}</td><td>{{ a[4] }}</td></tr>
+{% endfor %}
+</table>
+<br>
+<table border="0" cellpadding="2">
+<tr><td><a href="/subaccount/new?mno={{ mno }}">Open Sub-Account</a> &nbsp;|&nbsp; <a href="/lookup">New Inquiry</a> &nbsp;|&nbsp; <a href="javascript:window.print()">Print</a></td></tr>
+</table>
+{% endblock %}

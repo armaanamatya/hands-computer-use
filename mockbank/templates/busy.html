@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}System Busy{% endblock %}
+{% block heading %}Please Wait{% endblock %}
+{% block body %}
+<table border="0" cellpadding="3"><tr><td class="c4">System busy. The host did not respond in time. Please retry your request.</td></tr></table>
+<form action="/member" method="get">
+<input type="hidden" name="mno" value="{{ mno }}">
+<table border="0" cellpadding="2"><tr><td><input type="submit" value="Retry"></td></tr></table>
+</form>
+{% endblock %}
