@@ -1,0 +1,246 @@
+[
+  {
+    "code": "MEMBER_NOT_FOUND",
+    "kind": "business",
+    "origin": "library",
+    "scope": "global",
+    "detect": {
+      "type": "text_present",
+      "pattern": "No member found for number",
+      "negate": false,
+      "frame": {
+        "url_pattern": null,
+        "name": "work",
+        "index": null
+      }
+    },
+    "message": "No member exists with that member number.",
+    "handling": {
+      "action": "stop",
+      "target": null,
+      "max_attempts": 2
+    },
+    "result_outputs": {}
+  },
+  {
+    "code": "ACCOUNT_RESTRICTED",
+    "kind": "business",
+    "origin": "library",
+    "scope": "global",
+    "detect": {
+      "type": "text_present",
+      "pattern": "record is restricted",
+      "negate": false,
+      "frame": {
+        "url_pattern": null,
+        "name": "work",
+        "index": null
+      }
+    },
+    "message": "This member's record is restricted; contact a supervisor.",
+    "handling": {
+      "action": "stop",
+      "target": null,
+      "max_attempts": 2
+    },
+    "result_outputs": {
+      "restriction_reason": {
+        "target": {
+          "description": "The restriction notice text on the member-inquiry error page",
+          "frame": {
+            "url_pattern": null,
+            "name": "work",
+            "index": null
+          },
+          "strategies": [
+            {
+              "kind": "text",
+              "params": {
+                "text": "record is restricted",
+                "exact": false
+              },
+              "rationale": "the restriction sentence is the only text on the page containing this phrase; substring match is stable even if the member number or the trailing reference code changes"
+            }
+          ],
+          "snapshot": {}
+        },
+        "from": "text",
+        "attribute": null,
+        "table": null,
+        "parse": {
+          "type": "string",
+          "regex": null,
+          "group": 0
+        },
+        "output": "restriction_reason"
+      }
+    }
+  },
+  {
+    "code": "SYSTEM_BUSY",
+    "kind": "interstitial",
+    "origin": "library",
+    "scope": "global",
+    "detect": {
+      "type": "text_present",
+      "pattern": "System busy",
+      "negate": false,
+      "frame": {
+        "url_pattern": null,
+        "name": "work",
+        "index": null
+      }
+    },
+    "message": "System busy; the host did not respond in time.",
+    "handling": {
+      "action": "click",
+      "target": {
+        "description": "Retry button on the 'System busy' interstitial",
+        "frame": {
+          "url_pattern": null,
+          "name": "work",
+          "index": null
+        },
+        "strategies": [
+          {
+            "kind": "role",
+            "params": {
+              "role": "button",
+              "name": "Retry"
+            },
+            "rationale": "the only submit control on the busy interstitial, labelled Retry"
+          }
+        ],
+        "snapshot": {}
+      },
+      "max_attempts": 2
+    },
+    "result_outputs": {}
+  },
+  {
+    "code": "SESSION_EXPIRED",
+    "kind": "auth",
+    "origin": "library",
+    "scope": "global",
+    "detect": {
+      "type": "text_present",
+      "pattern": "Your session has expired",
+      "negate": false,
+      "frame": {
+        "url_pattern": null,
+        "name": "work",
+        "index": null
+      }
+    },
+    "message": "Your session has expired; please sign on again.",
+    "handling": {
+      "action": "escalate",
+      "target": null,
+      "max_attempts": 2
+    },
+    "result_outputs": {}
+  },
+  {
+    "code": "APP_ERROR",
+    "kind": "app_error",
+    "origin": "library",
+    "scope": "global",
+    "detect": {
+      "type": "any_of",
+      "conditions": [
+        {
+          "type": "text_present",
+          "pattern": "Internal Server Error",
+          "negate": false,
+          "frame": {
+            "url_pattern": null,
+            "name": "work",
+            "index": null
+          }
+        },
+        {
+          "type": "text_present",
+          "pattern": "CBS-0500",
+          "negate": false,
+          "frame": {
+            "url_pattern": null,
+            "name": "work",
+            "index": null
+          }
+        }
+      ],
+      "frame": null
+    },
+    "message": "The host returned an internal server error (CBS-0500).",
+    "handling": {
+      "action": "stop",
+      "target": null,
+      "max_attempts": 2
+    },
+    "result_outputs": {}
+  },
+  {
+    "code": "VALIDATION_ERROR",
+    "kind": "business",
+    "origin": "library",
+    "scope": "global",
+    "detect": {
+      "type": "text_present",
+      "pattern": "Nickname is required\\.",
+      "negate": false,
+      "frame": {
+        "url_pattern": null,
+        "name": "work",
+        "index": null
+      }
+    },
+    "message": "Nickname is required to open a sub-account.",
+    "handling": {
+      "action": "stop",
+      "target": null,
+      "max_attempts": 2
+    },
+    "result_outputs": {}
+  },
+  {
+    "code": "SUPERVISOR_OVERRIDE_REQUIRED",
+    "kind": "requires_human",
+    "origin": "library",
+    "scope": "global",
+    "detect": {
+      "type": "text_present",
+      "pattern": "Supervisor override",
+      "negate": false,
+      "frame": {
+        "url_pattern": null,
+        "name": "work",
+        "index": null
+      }
+    },
+    "message": "Supervisor override is required to open this sub-account.",
+    "handling": {
+      "action": "escalate",
+      "target": null,
+      "max_attempts": 2
+    },
+    "result_outputs": {}
+  },
+  {
+    "code": "UNEXPECTED_CONFIRM",
+    "kind": "interstitial",
+    "origin": "library",
+    "scope": "global",
+    "detect": {
+      "type": "dialog_open",
+      "pattern": null,
+      "frame": null
+    },
+    "message": "An unexpected confirmation dialog appeared.",
+    "handling": {
+      "action": "dismiss_dialog",
+      "target": null,
+      "max_attempts": 2
+    },
+    "result_outputs": {}
+  }
+]
