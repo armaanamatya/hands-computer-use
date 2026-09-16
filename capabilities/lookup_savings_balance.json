@@ -1,0 +1,776 @@
+{
+  "schema_version": "1.0",
+  "id": "legacycore.lookup_savings_balance",
+  "name": "Look up savings balance",
+  "version": "1.0.0",
+  "description": "Signs on to LegacyCore, looks up a member by id, and extracts their current savings balance.",
+  "content_hash": "d3c6b70d0c00993a6d29d6afce9d383bf336b337a02521746292628372ff5b6f",
+  "approval": {
+    "status": "draft",
+    "approved_by": null,
+    "approved_at": null,
+    "approved_hash": null
+  },
+  "contract": {
+    "inputs": {
+      "member_id": {
+        "type": "string",
+        "required": true,
+        "description": "Member number to look up",
+        "sensitive": false,
+        "source": "caller",
+        "pattern": "^\\d{5}$",
+        "enum": null,
+        "example": "12345"
+      },
+      "username": {
+        "type": "string",
+        "required": true,
+        "description": "Teller sign-on username",
+        "sensitive": false,
+        "source": "caller",
+        "pattern": null,
+        "enum": null,
+        "example": "teller1"
+      },
+      "password": {
+        "type": "string",
+        "required": true,
+        "description": "Teller sign-on password",
+        "sensitive": true,
+        "source": "vault",
+        "pattern": null,
+        "enum": null,
+        "example": null
+      }
+    },
+    "outputs": {
+      "savings_balance": {
+        "type": "money",
+        "description": "The member's current savings balance",
+        "source_step": "s7"
+      }
+    },
+    "outcome_codes": [
+      "MEMBER_NOT_FOUND",
+      "ACCOUNT_RESTRICTED",
+      "SYSTEM_BUSY",
+      "SESSION_EXPIRED",
+      "APP_ERROR",
+      "UNEXPECTED_CONFIRM"
+    ],
+    "side_effects": "reads",
+    "idempotent": true,
+    "preconditions": []
+  },
+  "target": {
+    "surface": "web",
+    "app": {
+      "vendor": "LegacyCore",
+      "product": "Teller Console",
+      "version": "7.2"
+    },
+    "entry_url": "http://127.0.0.1:5050/",
+    "fingerprint": [
+      {
+        "type": "text_present",
+        "pattern": "LegacyCore",
+        "negate": false,
+        "frame": {
+          "url_pattern": null,
+          "name": "menu",
+          "index": null
+        }
+      }
+    ]
+  },
+  "screens": {
+    "login": {
+      "id": "login",
+      "description": "Teller sign-on form",
+      "frame": {
+        "url_pattern": null,
+        "name": "work",
+        "index": null
+      },
+      "url_pattern": "/main(\\?|$)",
+      "landmarks": [
+        {
+          "type": "text_present",
+          "pattern": "Sign On",
+          "negate": false,
+          "frame": {
+            "url_pattern": null,
+            "name": "work",
+            "index": null
+          }
+        }
+      ]
+    },
+    "lookup": {
+      "id": "lookup",
+      "description": "Member lookup form",
+      "frame": {
+        "url_pattern": null,
+        "name": "work",
+        "index": null
+      },
+      "url_pattern": "/lookup(\\?|$)",
+      "landmarks": [
+        {
+          "type": "text_present",
+          "pattern": "Member No\\.",
+          "negate": false,
+          "frame": {
+            "url_pattern": null,
+            "name": "work",
+            "index": null
+          }
+        }
+      ]
+    },
+    "member_detail": {
+      "id": "member_detail",
+      "description": "Member detail with account balances",
+      "frame": {
+        "url_pattern": null,
+        "name": "work",
+        "index": null
+      },
+      "url_pattern": "/member(\\?|$)",
+      "landmarks": [
+        {
+          "type": "text_present",
+          "pattern": "Accounts",
+          "negate": false,
+          "frame": {
+            "url_pattern": null,
+            "name": "work",
+            "index": null
+          }
+        },
+        {
+          "type": "text_present",
+          "pattern": "Curr Bal",
+          "negate": false,
+          "frame": {
+            "url_pattern": null,
+            "name": "work",
+            "index": null
+          }
+        }
+      ]
+    }
+  },
+  "steps": [
+    {
+      "id": "s1",
+      "kind": "navigate",
+      "screen": "login",
+      "intent": "Open the LegacyCore entry point",
+      "origin": "agent",
+      "target": null,
+      "value": "http://127.0.0.1:5050/",
+      "expect_dialog": null,
+      "wait": {
+        "until": "load",
+        "timeout_ms": 10000
+      },
+      "checkpoint": null,
+      "extract": null,
+      "risk": {
+        "level": "safe",
+        "reason": null,
+        "requires_confirmation": false,
+        "idempotency_check": null
+      },
+      "human_task": null
+    },
+    {
+      "id": "s2",
+      "kind": "type",
+      "screen": "login",
+      "intent": "Enter the teller username",
+      "origin": "agent",
+      "target": {
+        "description": "Username field on the sign-on form",
+        "frame": {
+          "url_pattern": null,
+          "name": "work",
+          "index": null
+        },
+        "strategies": [
+          {
+            "kind": "relative",
+            "params": {
+              "anchor_text": "User ID",
+              "relation": "same_row",
+              "role": "textbox"
+            },
+            "rationale": "the 'User ID' table row has exactly one control; row-scoping is needed because this bare <input> has no accessible name of its own for get_by_role(name=...) to match -- no <label>, no aria-label, just a sibling <td> the accessibility tree does not associate with it"
+          },
+          {
+            "kind": "structural",
+            "params": {
+              "path": "input[name=uid]"
+            },
+            "rationale": "the field's HTML name attribute is stable legacy-app plumbing, unlikely to change even if the visible label wording does"
+          }
+        ],
+        "snapshot": {}
+      },
+      "value": "{{username}}",
+      "expect_dialog": null,
+      "wait": {
+        "until": "load",
+        "timeout_ms": 10000
+      },
+      "checkpoint": null,
+      "extract": null,
+      "risk": {
+        "level": "safe",
+        "reason": null,
+        "requires_confirmation": false,
+        "idempotency_check": null
+      },
+      "human_task": null
+    },
+    {
+      "id": "s3",
+      "kind": "type",
+      "screen": "login",
+      "intent": "Enter the teller password",
+      "origin": "agent",
+      "target": {
+        "description": "Password field on the sign-on form",
+        "frame": {
+          "url_pattern": null,
+          "name": "work",
+          "index": null
+        },
+        "strategies": [
+          {
+            "kind": "relative",
+            "params": {
+              "anchor_text": "Password",
+              "relation": "same_row",
+              "role": "textbox"
+            },
+            "rationale": "same reasoning as the username field: the 'Password' row has exactly one control and no accessible name of its own"
+          },
+          {
+            "kind": "structural",
+            "params": {
+              "path": "input[name=pwd]"
+            },
+            "rationale": "stable HTML name attribute fallback"
+          }
+        ],
+        "snapshot": {}
+      },
+      "value": "{{password}}",
+      "expect_dialog": null,
+      "wait": {
+        "until": "load",
+        "timeout_ms": 10000
+      },
+      "checkpoint": null,
+      "extract": null,
+      "risk": {
+        "level": "safe",
+        "reason": null,
+        "requires_confirmation": false,
+        "idempotency_check": null
+      },
+      "human_task": null
+    },
+    {
+      "id": "s4",
+      "kind": "click",
+      "screen": "login",
+      "intent": "Submit the sign-on form",
+      "origin": "agent",
+      "target": {
+        "description": "Sign On submit button",
+        "frame": {
+          "url_pattern": null,
+          "name": "work",
+          "index": null
+        },
+        "strategies": [
+          {
+            "kind": "role",
+            "params": {
+              "role": "button",
+              "name": "Sign On",
+              "exact": true
+            },
+            "rationale": "a submit input's accessible name comes from its value attribute, which is exactly the visible label a teller reads"
+          },
+          {
+            "kind": "structural",
+            "params": {
+              "path": "input[type=submit]"
+            },
+            "rationale": "the only submit control on the sign-on form"
+          }
+        ],
+        "snapshot": {}
+      },
+      "value": null,
+      "expect_dialog": null,
+      "wait": {
+        "until": "load",
+        "timeout_ms": 10000
+      },
+      "checkpoint": {
+        "condition": {
+          "type": "url_matches",
+          "pattern": "/lookup(\\?|$)",
+          "frame": {
+            "url_pattern": null,
+            "name": "work",
+            "index": null
+          }
+        },
+        "description": "Landed on the member lookup screen after signing on"
+      },
+      "extract": null,
+      "risk": {
+        "level": "risky",
+        "reason": "submits credentials and establishes an authenticated teller session",
+        "requires_confirmation": true,
+        "idempotency_check": null
+      },
+      "human_task": null
+    },
+    {
+      "id": "s5",
+      "kind": "type",
+      "screen": "lookup",
+      "intent": "Enter the member id to search for",
+      "origin": "agent",
+      "target": {
+        "description": "Member number field on the lookup form",
+        "frame": {
+          "url_pattern": null,
+          "name": "work",
+          "index": null
+        },
+        "strategies": [
+          {
+            "kind": "relative",
+            "params": {
+              "anchor_text": "Member No.",
+              "relation": "same_row",
+              "role": "textbox"
+            },
+            "rationale": "the 'Member No.' row has exactly one control and, like the sign-on fields, no accessible name of its own"
+          },
+          {
+            "kind": "structural",
+            "params": {
+              "path": "input[name=mno]"
+            },
+            "rationale": "stable HTML name attribute fallback"
+          }
+        ],
+        "snapshot": {}
+      },
+      "value": "{{member_id}}",
+      "expect_dialog": null,
+      "wait": {
+        "until": "load",
+        "timeout_ms": 10000
+      },
+      "checkpoint": null,
+      "extract": null,
+      "risk": {
+        "level": "safe",
+        "reason": null,
+        "requires_confirmation": false,
+        "idempotency_check": null
+      },
+      "human_task": null
+    },
+    {
+      "id": "s6",
+      "kind": "click",
+      "screen": "lookup",
+      "intent": "Run the member search",
+      "origin": "agent",
+      "target": {
+        "description": "Search submit button on the lookup screen",
+        "frame": {
+          "url_pattern": null,
+          "name": "work",
+          "index": null
+        },
+        "strategies": [
+          {
+            "kind": "role",
+            "params": {
+              "role": "button",
+              "name": "Search",
+              "exact": true
+            },
+            "rationale": "frame-scoped to 'work', which is what disambiguates it from the nav frame's own identically-labelled Quick Search button -- the two are never confused because target resolution only ever looks inside the frame this TargetSpec's own FrameMatcher selects"
+          },
+          {
+            "kind": "structural",
+            "params": {
+              "path": "input[type=submit]"
+            },
+            "rationale": "the only submit control on the lookup form itself"
+          }
+        ],
+        "snapshot": {}
+      },
+      "value": null,
+      "expect_dialog": null,
+      "wait": {
+        "until": "load",
+        "timeout_ms": 10000
+      },
+      "checkpoint": {
+        "condition": {
+          "type": "text_present",
+          "pattern": "Accounts",
+          "negate": false,
+          "frame": {
+            "url_pattern": null,
+            "name": "work",
+            "index": null
+          }
+        },
+        "description": "Member detail page loaded, showing the Accounts section"
+      },
+      "extract": null,
+      "risk": {
+        "level": "safe",
+        "reason": null,
+        "requires_confirmation": false,
+        "idempotency_check": null
+      },
+      "human_task": null
+    },
+    {
+      "id": "s7",
+      "kind": "extract",
+      "screen": "member_detail",
+      "intent": "Read the member's savings current balance",
+      "origin": "agent",
+      "target": null,
+      "value": null,
+      "expect_dialog": null,
+      "wait": {
+        "until": "load",
+        "timeout_ms": 10000
+      },
+      "checkpoint": {
+        "condition": {
+          "type": "text_present",
+          "pattern": "Curr Bal",
+          "negate": false,
+          "frame": {
+            "url_pattern": null,
+            "name": "work",
+            "index": null
+          }
+        },
+        "description": "Accounts table visible with balance columns"
+      },
+      "extract": {
+        "target": {
+          "description": "The member's accounts table (Acct No / Type / Curr Bal / Avail Bal / Status)",
+          "frame": {
+            "url_pattern": null,
+            "name": "work",
+            "index": null
+          },
+          "strategies": [
+            {
+              "kind": "structural",
+              "params": {
+                "path": "table:has-text('Curr Bal')"
+              },
+              "rationale": "the only table on the member-detail page whose text contains the balance header; robust to the member-info, section-label, and action-links tables around it being reordered, added to, or restyled, since none of them mention balances"
+            },
+            {
+              "kind": "structural",
+              "params": {
+                "path": "html>body:nth-of-type(1)>font:nth-of-type(1)>table:nth-of-type(4)"
+              },
+              "rationale": "literal nth-of-type position captured at discovery time; a last-resort fallback if the page ever stops containing the literal text 'Curr Bal' (e.g. a relabelled column) but keeps the same table layout"
+            }
+          ],
+          "snapshot": {}
+        },
+        "from": "table_cell",
+        "attribute": null,
+        "table": {
+          "header_match": "Curr Bal",
+          "row_where": {
+            "header": "Type",
+            "matches": "^SAV$"
+          }
+        },
+        "parse": {
+          "type": "money",
+          "regex": null,
+          "group": 0
+        },
+        "output": "savings_balance"
+      },
+      "risk": {
+        "level": "safe",
+        "reason": null,
+        "requires_confirmation": false,
+        "idempotency_check": null
+      },
+      "human_task": null
+    }
+  ],
+  "outcomes": [
+    {
+      "code": "MEMBER_NOT_FOUND",
+      "kind": "business",
+      "origin": "library",
+      "scope": "global",
+      "detect": {
+        "type": "text_present",
+        "pattern": "No member found for number",
+        "negate": false,
+        "frame": {
+          "url_pattern": null,
+          "name": "work",
+          "index": null
+        }
+      },
+      "message": "No member exists with that member number.",
+      "handling": {
+        "action": "stop",
+        "target": null,
+        "max_attempts": 2
+      },
+      "result_outputs": {}
+    },
+    {
+      "code": "ACCOUNT_RESTRICTED",
+      "kind": "business",
+      "origin": "library",
+      "scope": "global",
+      "detect": {
+        "type": "text_present",
+        "pattern": "record is restricted",
+        "negate": false,
+        "frame": {
+          "url_pattern": null,
+          "name": "work",
+          "index": null
+        }
+      },
+      "message": "This member's record is restricted; contact a supervisor.",
+      "handling": {
+        "action": "stop",
+        "target": null,
+        "max_attempts": 2
+      },
+      "result_outputs": {
+        "restriction_reason": {
+          "target": {
+            "description": "The restriction notice text on the member-inquiry error page",
+            "frame": {
+              "url_pattern": null,
+              "name": "work",
+              "index": null
+            },
+            "strategies": [
+              {
+                "kind": "text",
+                "params": {
+                  "text": "record is restricted",
+                  "exact": false
+                },
+                "rationale": "the restriction sentence is the only text on the page containing this phrase; a substring match is stable even if the member number or the trailing reference code changes"
+              }
+            ],
+            "snapshot": {}
+          },
+          "from": "text",
+          "attribute": null,
+          "table": null,
+          "parse": {
+            "type": "string",
+            "regex": null,
+            "group": 0
+          },
+          "output": "restriction_reason"
+        }
+      }
+    },
+    {
+      "code": "SYSTEM_BUSY",
+      "kind": "interstitial",
+      "origin": "library",
+      "scope": "global",
+      "detect": {
+        "type": "text_present",
+        "pattern": "System busy",
+        "negate": false,
+        "frame": {
+          "url_pattern": null,
+          "name": "work",
+          "index": null
+        }
+      },
+      "message": "System busy; the host did not respond in time.",
+      "handling": {
+        "action": "click",
+        "target": {
+          "description": "Retry button on the 'System busy' interstitial",
+          "frame": {
+            "url_pattern": null,
+            "name": "work",
+            "index": null
+          },
+          "strategies": [
+            {
+              "kind": "role",
+              "params": {
+                "role": "button",
+                "name": "Retry"
+              },
+              "rationale": "the only submit control on the busy interstitial, labelled Retry"
+            }
+          ],
+          "snapshot": {}
+        },
+        "max_attempts": 2
+      },
+      "result_outputs": {}
+    },
+    {
+      "code": "SESSION_EXPIRED",
+      "kind": "auth",
+      "origin": "library",
+      "scope": "global",
+      "detect": {
+        "type": "text_present",
+        "pattern": "Your session has expired",
+        "negate": false,
+        "frame": {
+          "url_pattern": null,
+          "name": "work",
+          "index": null
+        }
+      },
+      "message": "Your session has expired; please sign on again.",
+      "handling": {
+        "action": "escalate",
+        "target": null,
+        "max_attempts": 2
+      },
+      "result_outputs": {}
+    },
+    {
+      "code": "APP_ERROR",
+      "kind": "app_error",
+      "origin": "library",
+      "scope": "global",
+      "detect": {
+        "type": "any_of",
+        "conditions": [
+          {
+            "type": "text_present",
+            "pattern": "Internal Server Error",
+            "negate": false,
+            "frame": {
+              "url_pattern": null,
+              "name": "work",
+              "index": null
+            }
+          },
+          {
+            "type": "text_present",
+            "pattern": "CBS-0500",
+            "negate": false,
+            "frame": {
+              "url_pattern": null,
+              "name": "work",
+              "index": null
+            }
+          }
+        ],
+        "frame": null
+      },
+      "message": "The host returned an internal server error (CBS-0500).",
+      "handling": {
+        "action": "stop",
+        "target": null,
+        "max_attempts": 2
+      },
+      "result_outputs": {}
+    },
+    {
+      "code": "UNEXPECTED_CONFIRM",
+      "kind": "interstitial",
+      "origin": "library",
+      "scope": "global",
+      "detect": {
+        "type": "dialog_open",
+        "pattern": null,
+        "frame": null
+      },
+      "message": "An unexpected confirmation dialog appeared.",
+      "handling": {
+        "action": "dismiss_dialog",
+        "target": null,
+        "max_attempts": 2
+      },
+      "result_outputs": {}
+    }
+  ],
+  "success": {
+    "condition": {
+      "type": "text_present",
+      "pattern": "Curr Bal",
+      "negate": false,
+      "frame": {
+        "url_pattern": null,
+        "name": "work",
+        "index": null
+      }
+    },
+    "description": "Savings balance is visible on the member's accounts table"
+  },
+  "policy": {
+    "allowed_domains": [
+      "127.0.0.1"
+    ],
+    "allowed_actions": [
+      "navigate",
+      "type",
+      "click",
+      "extract"
+    ],
+    "allow_coordinate_fallback": false
+  },
+  "provenance": {
+    "source_goal": "Sign on, look up a member by id, and read their current savings balance",
+    "discovery_run_id": "hand-authored-0001",
+    "model": "hand-authored",
+    "prompt_version": "n/a",
+    "recorded_at": "2026-09-16T03:33:59.558+00:00",
+    "recorded_against": {
+      "note": "hand-authored test fixture, not a model discovery run",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "browser": "chromium"
+    },
+    "evidence_ref": null,
+    "raw_artifact_ref": null
+  }
+}
